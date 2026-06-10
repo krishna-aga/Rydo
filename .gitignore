@@ -1,0 +1,29 @@
+# Dependencies - NEVER TRACK
+node_modules/
+.pnpm-store/
+
+# Build and outputs
+dist/
+build/
+.turbo/
+.next/
+
+# Environment variables - NEVER TRACK PRIVATE CONFIGS
+.env
+.env.local
+.env.*.local
+
+# Project Specific Agent Rules - DO NOT TRACK
+docs/AGENTS.md
+docs/agents.md
+
+# IDEs and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
