@@ -4,19 +4,14 @@ import L from 'leaflet';
 interface MapCanvasProps {
   pickupLocation?: string;
   destination?: string;
+  onlineDrivers?: any[];
+  assignedDriverId?: string;
 }
 
-// Coordinate mappings for IIT Roorkee landmarks
-export const LANDMARK_COORDINATES: Record<string, [number, number]> = {
-  'Main Gate': [29.8643, 77.8965],
-  'Govind Bhawan': [29.8659, 77.8943],
-  'Rajendra Bhawan': [29.8621, 77.8981],
-  'Ravindra Bhawan': [29.8681, 77.8931],
-  'Lecture Hall Complex': [29.8649, 77.8955],
-  'Library': [29.8638, 77.8960]
-};
+import { LANDMARK_COORDINATES } from '../utils/coordinates.js';
 
-export default function MapCanvas({ pickupLocation, destination }: MapCanvasProps) {
+
+export default function MapCanvas({ pickupLocation, destination, onlineDrivers, assignedDriverId }: MapCanvasProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
@@ -93,37 +88,69 @@ export default function MapCanvas({ pickupLocation, destination }: MapCanvasProp
       markersRef.current.push(marker);
     }
 
-    // Draw route if both are present
-    if (points.length === 2) {
-      const polyline = L.polyline(points, {
+    // Render online drivers
+    if (onlineDrivers && onlineDrivers.length > 0) {
+      onlineDrivers.forEach((driver) => {
+        if (driver.latitude && driver.longitude) {
+          const isAssigned = assignedDriverId === driver.id;
+          const coord: [number, number] = [driver.latitude, driver.longitude];
+          
+          if (isAssigned) {
+            points.push(coord);
+          }
+
+          const colorClass = isAssigned
+            ? 'bg-amber-400 animate-pulse border-amber-300 scale-125'
+            : 'bg-emerald-400 border border-emerald-500 shadow-lg';
+          
+          const label = isAssigned
+            ? `⭐ ${driver.name || 'Assigned Driver'}`
+            : `${driver.name || 'E-Rickshaw'}`;
+
+          const marker = L.marker(coord, {
+            icon: createCustomIcon(colorClass, label)
+          }).addTo(map);
+          markersRef.current.push(marker);
+        }
+      });
+    } else {
+      // Spawn mock e-rickshaw drivers if no onlineDrivers are loaded AND no coordinates are present
+      if (points.length === 0) {
+        const mockDrivers: [number, number][] = [
+          [29.8635, 77.8935],
+          [29.8655, 77.8970],
+          [29.8625, 77.8955]
+        ];
+        mockDrivers.forEach((coord, idx) => {
+          const marker = L.marker(coord, {
+            icon: createCustomIcon('bg-emerald-400 border border-emerald-500 shadow-lg', `E-Rickshaw #${idx + 104}`)
+          }).addTo(map);
+          markersRef.current.push(marker);
+        });
+      }
+    }
+
+    // Draw route if both pickup and destination are present
+    if (pickupLocation && LANDMARK_COORDINATES[pickupLocation] && destination && LANDMARK_COORDINATES[destination]) {
+      const pCoord = LANDMARK_COORDINATES[pickupLocation];
+      const dCoord = LANDMARK_COORDINATES[destination];
+      const polyline = L.polyline([pCoord, dCoord], {
         color: '#6366f1',
         weight: 4,
         opacity: 0.8,
         dashArray: '8, 12'
       }).addTo(map);
       routingPolylineRef.current = polyline;
+    }
 
-      map.fitBounds(polyline.getBounds(), { padding: [50, 50] });
+    // Adjust bounds
+    if (points.length >= 2) {
+      map.fitBounds(L.latLngBounds(points), { padding: [50, 50] });
     } else if (points.length === 1) {
       map.setView(points[0], 16);
     }
 
-    // Spawn mock e-rickshaw drivers if no active route is mapped
-    if (points.length === 0) {
-      const mockDrivers: [number, number][] = [
-        [29.8635, 77.8935],
-        [29.8655, 77.8970],
-        [29.8625, 77.8955]
-      ];
-      mockDrivers.forEach((coord, idx) => {
-        const marker = L.marker(coord, {
-          icon: createCustomIcon('bg-emerald-400 border border-emerald-500 shadow-lg', `E-Rickshaw #${idx + 104}`)
-        }).addTo(map);
-        markersRef.current.push(marker);
-      });
-    }
-
-  }, [pickupLocation, destination]);
+  }, [pickupLocation, destination, onlineDrivers, assignedDriverId]);
 
   return (
     <div className="w-full h-full relative overflow-hidden rounded-2xl border border-slate-800 shadow-2xl">

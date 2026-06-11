@@ -48,6 +48,8 @@ model Driver {
   isOnline           Boolean            @default(false)
   verificationStatus VerificationStatus @default(PENDING)
   rating             Float              @default(5.0)
+  latitude           Float?
+  longitude          Float?
 
   // Relations
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)

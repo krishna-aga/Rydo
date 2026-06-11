@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { Ride, ApiResponse } from '@rydo/shared';
+import { Ride } from '@rydo/shared';
+import { apiService } from '../services/api.service.js';
 
 interface RideState {
   activeRide: Ride | null;
@@ -17,8 +18,6 @@ interface RideState {
   fetchOnlineDrivers: (token: string) => Promise<void>;
 }
 
-const API_URL = 'http://localhost:5000/api';
-
 export const useRideStore = create<RideState>((set) => ({
   activeRide: null,
   availableRides: [],
@@ -29,10 +28,7 @@ export const useRideStore = create<RideState>((set) => ({
   fetchActiveRide: async (token) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/rides/active`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data: ApiResponse<Ride> = await res.json();
+      const data = await apiService.getActiveRide(token);
       if (data.success) {
         set({ activeRide: data.data || null, loading: false });
       } else {
@@ -46,15 +42,7 @@ export const useRideStore = create<RideState>((set) => ({
   requestRide: async (token, payload) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/rides/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify(payload)
-      });
-      const data: ApiResponse<Ride> = await res.json();
+      const data = await apiService.requestRide(token, payload);
       if (data.success && data.data) {
         set({ activeRide: data.data, loading: false });
         return true;
@@ -71,15 +59,7 @@ export const useRideStore = create<RideState>((set) => ({
   acceptRide: async (token, rideId) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/rides/accept`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ rideId })
-      });
-      const data: ApiResponse<Ride> = await res.json();
+      const data = await apiService.acceptRide(token, rideId);
       if (data.success && data.data) {
         set({ activeRide: data.data, loading: false });
         set(state => ({
@@ -99,15 +79,7 @@ export const useRideStore = create<RideState>((set) => ({
   cancelRide: async (token, rideId) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/rides/cancel`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ rideId })
-      });
-      const data: ApiResponse<Ride> = await res.json();
+      const data = await apiService.cancelRide(token, rideId);
       if (data.success) {
         set({ activeRide: null, loading: false });
         return true;
@@ -124,15 +96,7 @@ export const useRideStore = create<RideState>((set) => ({
   updateDriverStatus: async (token, isOnline) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/drivers/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ isOnline })
-      });
-      const data: ApiResponse<any> = await res.json();
+      const data = await apiService.updateDriverStatus(token, isOnline);
       if (data.success) {
         set({ loading: false });
         return true;
@@ -149,15 +113,7 @@ export const useRideStore = create<RideState>((set) => ({
   progressRideStatus: async (token, rideId, status) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/rides/${rideId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({ status })
-      });
-      const data: ApiResponse<Ride> = await res.json();
+      const data = await apiService.progressRideStatus(token, rideId, status);
       if (data.success && data.data) {
         if (status === 'COMPLETED') {
           set({ activeRide: null, loading: false });
@@ -177,10 +133,7 @@ export const useRideStore = create<RideState>((set) => ({
 
   fetchAvailableRides: async (token) => {
     try {
-      const res = await fetch(`${API_URL}/rides/available`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data: ApiResponse<Ride[]> = await res.json();
+      const data = await apiService.getAvailableRides(token);
       if (data.success && data.data) {
         set({ availableRides: data.data });
       }
@@ -191,10 +144,7 @@ export const useRideStore = create<RideState>((set) => ({
 
   fetchOnlineDrivers: async (token) => {
     try {
-      const res = await fetch(`${API_URL}/drivers/online`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data: ApiResponse<any[]> = await res.json();
+      const data = await apiService.getOnlineDrivers(token);
       if (data.success && data.data) {
         set({ onlineDrivers: data.data });
       }

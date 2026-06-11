@@ -18,6 +18,8 @@ export interface Driver {
   isOnline: boolean;
   verificationStatus: VerificationStatus;
   rating: number;
+  latitude?: number;
+  longitude?: number;
   user?: User;
 }
 

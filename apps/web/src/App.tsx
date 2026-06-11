@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuthStore } from './store/useAuthStore.js';
 import { useRideStore } from './store/useRideStore.js';
+import { useSocketStore } from './store/useSocketStore.js';
 import AuthScreen from './components/AuthScreen.js';
 import MapCanvas from './components/MapCanvas.js';
+import RatingModal from './components/RatingModal.js';
+import DriverStatsDashboard from './components/DriverStatsDashboard.js';
 import { Button } from '@rydo/ui';
 
 export default function App() {
@@ -21,6 +24,8 @@ export default function App() {
     fetchOnlineDrivers
   } = useRideStore();
 
+  const { connectSocket, disconnectSocket } = useSocketStore();
+
   const [pickup, setPickup] = useState('Main Gate');
   const [destination, setDestination] = useState('Govind Bhawan');
   const [fare, setFare] = useState(40);
@@ -30,23 +35,75 @@ export default function App() {
     checkMe();
   }, []);
 
-  // Set up synchronization loops (simulated real-time tracking)
+  // Connect socket on validation
   useEffect(() => {
-    if (!token) return;
-
-    // Initial fetches
-    fetchActiveRide(token);
-
-    const interval = setInterval(() => {
+    if (token && user) {
+      connectSocket(user.id, user.role);
+      
+      // Pull initial state
       fetchActiveRide(token);
-      if (user?.role === 'PASSENGER') {
+      if (user.role === 'PASSENGER') {
         fetchOnlineDrivers(token);
-      } else if (user?.role === 'DRIVER' && driver?.isOnline) {
+      } else if (user.role === 'DRIVER') {
         fetchAvailableRides(token);
       }
-    }, 3000);
+    }
+    return () => {
+      disconnectSocket();
+    };
+  }, [token, user?.id]);
 
-    return () => clearInterval(interval);
+  // Sync available listings when driver changes online status
+  useEffect(() => {
+    if (token && user?.role === 'DRIVER' && driver?.isOnline) {
+      fetchAvailableRides(token);
+    }
+  }, [token, driver?.isOnline]);
+
+  // Real-Time GPS Geolocation Tracking for Drivers
+  useEffect(() => {
+    if (!token || user?.role !== 'DRIVER' || !driver?.isOnline) return;
+
+    const sendLocationUpdate = async (lat: number, lng: number) => {
+      try {
+        await fetch('http://localhost:5000/api/drivers/location', {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({ latitude: lat, longitude: lng })
+        });
+      } catch (err) {
+        console.error('Failed to send location update:', err);
+      }
+    };
+
+    if (!navigator.geolocation) {
+      console.error('Geolocation is not supported by this browser.');
+      return;
+    }
+
+    // Start watching physical position updates
+    const watchId = navigator.geolocation.watchPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        console.log('📍 Live geolocation update:', latitude, longitude);
+        sendLocationUpdate(latitude, longitude);
+      },
+      (error) => {
+        console.error('Error getting live geolocation:', error);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+    };
   }, [token, user?.role, driver?.isOnline]);
 
   if (!token || !user) {
@@ -67,7 +124,6 @@ export default function App() {
     const nextOnlineState = !driver.isOnline;
     const success = await updateDriverStatus(token, nextOnlineState);
     if (success) {
-      // Refresh user details to sync online flag
       checkMe();
     }
   };
@@ -249,7 +305,7 @@ export default function App() {
               <div className="flex-1 flex flex-col gap-6">
                 
                 {/* Online Offline Status toggle */}
-                <div className="border border-slate-800 bg-slate-900/50 rounded-2xl p-5 flex items-center justify-between">
+                <div className="border border-slate-800 bg-slate-900/50 rounded-2xl p-5 flex items-center justify-between shadow-lg">
                   <div>
                     <h3 className="font-bold text-slate-200">Go Online</h3>
                     <p className="text-xs text-slate-400 mt-0.5">Toggle availability to accept jobs</p>
@@ -278,42 +334,46 @@ export default function App() {
                     </p>
                   </div>
                 ) : !activeRide ? (
-                  /* Available Requests Grid List */
-                  <div className="space-y-4">
-                    <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Available Bookings Grid</h3>
-                    <div className="space-y-3">
-                      {availableRides.length > 0 ? (
-                        availableRides.map((ride) => (
-                          <div key={ride.id} className="border border-slate-800 bg-slate-900/40 rounded-xl p-4 space-y-3 hover:border-slate-700 transition-colors">
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <span className="text-xs font-semibold text-indigo-400">{ride.passenger?.name || 'Passenger'}</span>
-                                <div className="text-[10px] text-slate-500 mt-0.5">ID: {ride.id.substring(0, 8)}</div>
-                              </div>
-                              <span className="text-sm font-bold text-slate-200">₹{ride.fare}</span>
-                            </div>
-                            
-                            <div className="grid grid-cols-2 gap-4 text-xs text-slate-300 border-t border-b border-slate-800/80 py-2.5">
-                              <div>
-                                <span className="text-[10px] uppercase text-slate-500 block mb-0.5">Pickup</span>
-                                <span className="font-semibold text-slate-200">{ride.pickupLocation}</span>
-                              </div>
-                              <div>
-                                <span className="text-[10px] uppercase text-slate-500 block mb-0.5">Destination</span>
-                                <span className="font-semibold text-slate-200">{ride.destination}</span>
-                              </div>
-                            </div>
+                  /* Driver Stats & Available Job Feed Split */
+                  <div className="space-y-6">
+                    <DriverStatsDashboard />
 
-                            <Button className="w-full py-2 text-xs" onClick={() => acceptRide(token, ride.id)}>
-                              Accept Job Request
-                            </Button>
+                    <div className="space-y-4 pt-4 border-t border-slate-800/80">
+                      <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Available Bookings Grid</h3>
+                      <div className="space-y-3">
+                        {availableRides.length > 0 ? (
+                          availableRides.map((ride) => (
+                            <div key={ride.id} className="border border-slate-800 bg-slate-900/40 rounded-xl p-4 space-y-3 hover:border-slate-700 transition-colors">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <span className="text-xs font-semibold text-indigo-400">{ride.passenger?.name || 'Passenger'}</span>
+                                  <div className="text-[10px] text-slate-500 mt-0.5">ID: {ride.id.substring(0, 8)}</div>
+                                </div>
+                                <span className="text-sm font-bold text-slate-200">₹{ride.fare}</span>
+                              </div>
+                              
+                              <div className="grid grid-cols-2 gap-4 text-xs text-slate-300 border-t border-b border-slate-800/80 py-2.5">
+                                <div>
+                                  <span className="text-[10px] uppercase text-slate-500 block mb-0.5">Pickup</span>
+                                  <span className="font-semibold text-slate-200">{ride.pickupLocation}</span>
+                                </div>
+                                <div>
+                                  <span className="text-[10px] uppercase text-slate-500 block mb-0.5">Destination</span>
+                                  <span className="font-semibold text-slate-200">{ride.destination}</span>
+                                </div>
+                              </div>
+
+                              <Button className="w-full py-2 text-xs" onClick={() => acceptRide(token, ride.id)}>
+                                Accept Job Request
+                              </Button>
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center py-8 border border-slate-800/80 border-dashed rounded-xl text-slate-500 text-xs">
+                            Waiting for incoming passenger ride requests...
                           </div>
-                        ))
-                      ) : (
-                        <div className="text-center py-12 border border-slate-800/80 border-dashed rounded-xl text-slate-500 text-xs">
-                          Waiting for incoming passenger ride requests...
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -380,9 +440,29 @@ export default function App() {
           <MapCanvas
             pickupLocation={activeRide?.pickupLocation}
             destination={activeRide?.destination}
+            onlineDrivers={
+              user.role === 'DRIVER' && driver && driver.isOnline
+                ? [
+                    ...onlineDrivers.filter((d) => d.id !== driver.id),
+                    {
+                      id: driver.id,
+                      name: user.name || 'You',
+                      vehicleType: driver.vehicleType,
+                      vehicleNumber: driver.vehicleNumber,
+                      rating: driver.rating,
+                      latitude: driver.latitude,
+                      longitude: driver.longitude
+                    }
+                  ]
+                : onlineDrivers
+            }
+            assignedDriverId={activeRide?.driverId || undefined}
           />
         </main>
       </div>
+
+      {/* Ratings Modal overlay for completed ride feedbacks */}
+      <RatingModal />
     </div>
   );
 }

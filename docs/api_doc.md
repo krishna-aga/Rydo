@@ -63,19 +63,47 @@ Authenticates a user and returns a JSON Web Token (JWT).
   ```
 
 ### 3. Get Current User Profile
-Retrieves the logged-in user profile from token headers.
+Retrieves the logged-in user profile and driver profile details (if role is DRIVER) from token headers.
 - **URL**: `/api/auth/me`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
-- **Response (`200 OK`)**:
+- **Response (`200 OK` - Passenger)**:
   ```json
   {
     "success": true,
     "data": {
-      "id": "uuid-v4-identifier",
-      "email": "user@example.com",
-      "name": "John Doe",
-      "role": "PASSENGER"
+      "user": {
+        "id": "uuid-v4-identifier",
+        "email": "user@example.com",
+        "name": "John Doe",
+        "role": "PASSENGER",
+        "createdAt": "2026-06-10T12:00:00.000Z"
+      }
+    }
+  }
+  ```
+- **Response (`200 OK` - Driver)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "user": {
+        "id": "uuid-v4-identifier",
+        "email": "driver@example.com",
+        "name": "Jane Driver",
+        "role": "DRIVER",
+        "createdAt": "2026-06-10T12:00:00.000Z"
+      },
+      "driver": {
+        "id": "driver-uuid",
+        "vehicleType": "E-Rickshaw",
+        "vehicleNumber": "UK-08-ER-1234",
+        "isOnline": true,
+        "verificationStatus": "APPROVED",
+        "rating": 4.9,
+        "latitude": 29.8643,
+        "longitude": 77.8965
+      }
     }
   }
   ```
@@ -100,9 +128,39 @@ Updates a driver's online status and availability.
   {
     "success": true,
     "data": {
-      "driverId": "driver-uuid",
+      "id": "driver-uuid",
+      "userId": "user-uuid",
+      "vehicleType": "E-Rickshaw",
+      "vehicleNumber": "UK-08-ER-1234",
       "isOnline": true,
-      "verificationStatus": "APPROVED"
+      "verificationStatus": "APPROVED",
+      "rating": 4.9,
+      "latitude": 29.8643,
+      "longitude": 77.8965
+    }
+  }
+  ```
+
+### 2. Update Location Coordinates
+Updates a driver's current coordinates and broadcasts location coordinates to passengers in real-time.
+- **URL**: `/api/drivers/location`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+  ```json
+  {
+    "latitude": 29.8643,
+    "longitude": 77.8965
+  }
+  ```
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "driver-uuid",
+      "latitude": 29.8643,
+      "longitude": 77.8965
     }
   }
   ```
@@ -255,7 +313,7 @@ Progresses the ride lifecycle states (e.g. starting a ride or completing a ride)
 ## 🚗 Driver Online Listings (`/api/drivers`)
 
 ### 1. Fetch Online Drivers
-Lists all drivers currently marked as online.
+Lists all drivers currently marked as online, along with their coordinates for active passenger maps.
 - **URL**: `/api/drivers/online`
 - **Method**: `GET`
 - **Headers**: `Authorization: Bearer <token>`
@@ -269,9 +327,46 @@ Lists all drivers currently marked as online.
         "name": "Jane Driver",
         "vehicleType": "E-Rickshaw",
         "vehicleNumber": "UK-08-ER-1234",
-        "rating": 4.9
+        "rating": 4.9,
+        "latitude": 29.8643,
+        "longitude": 77.8965
       }
     ]
+  }
+  ```
+
+### 2. Fetch Driver Dashboard Stats (Drivers Only)
+Retrieves statistics (completed rides, active jobs, earnings, ratings), weekly chart datasets, and the last 5 recent ride logs.
+- **URL**: `/api/drivers/dashboard/stats`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "stats": {
+        "totalRides": 14,
+        "activeRides": 0,
+        "earnings": 560,
+        "rating": 4.8
+      },
+      "chartData": [
+        { "day": "Mon", "earnings": 80 },
+        { "day": "Tue", "earnings": 120 }
+      ],
+      "recentRides": [
+        {
+          "id": "ride-uuid",
+          "passengerName": "John Doe",
+          "pickupLocation": "Main Gate",
+          "destination": "Library",
+          "status": "COMPLETED",
+          "fare": 40,
+          "createdAt": "2026-06-12T01:00:00.000Z"
+        }
+      ]
+    }
   }
   ```
 
@@ -280,7 +375,7 @@ Lists all drivers currently marked as online.
 ## ⭐ Ratings & Reviews (`/api/ratings`)
 
 ### 1. Submit Rating
-Submits passenger feedback for a completed ride.
+Submits passenger feedback for a completed ride and updates the driver's running average rating.
 - **URL**: `/api/ratings`
 - **Method**: `POST`
 - **Headers**: `Authorization: Bearer <token>`
@@ -302,5 +397,26 @@ Submits passenger feedback for a completed ride.
       "stars": 5,
       "feedback": "Great and fast ride!"
     }
+  }
+  ```
+
+### 2. Fetch Reviews for Driver
+Retrieves a chronological list of reviews and feedback submitted by passengers for a specific driver.
+- **URL**: `/api/ratings/driver/:id`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "rating-uuid",
+        "stars": 5,
+        "feedback": "Great and fast ride!",
+        "createdAt": "2026-06-12T01:00:00.000Z",
+        "passengerName": "John Passenger"
+      }
+    ]
   }
   ```

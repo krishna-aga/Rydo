@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { User, Driver, ApiResponse } from '@rydo/shared';
+import { User, Driver } from '@rydo/shared';
+import { apiService } from '../services/api.service.js';
 
 interface AuthState {
   token: string | null;
@@ -14,8 +15,6 @@ interface AuthState {
   logout: () => void;
   checkMe: () => Promise<void>;
 }
-
-const API_URL = 'http://localhost:5000/api';
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   token: localStorage.getItem('rydo_token'),
@@ -38,12 +37,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   login: async (credentials) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(credentials)
-      });
-      const data: ApiResponse<any> = await res.json();
+      const data = await apiService.login(credentials);
       if (data.success && data.data) {
         const { token, user } = data.data;
         get().setToken(token);
@@ -63,12 +57,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   signup: async (userData) => {
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData)
-      });
-      const data: ApiResponse<any> = await res.json();
+      const data = await apiService.signup(userData);
       if (data.success && data.data) {
         const { token, user } = data.data;
         get().setToken(token);
@@ -95,10 +84,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     if (!token) return;
     set({ loading: true, error: null });
     try {
-      const res = await fetch(`${API_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const data: ApiResponse<any> = await res.json();
+      const data = await apiService.getMe(token);
       if (data.success && data.data) {
         set({
           user: data.data.user,

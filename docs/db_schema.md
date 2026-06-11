@@ -32,6 +32,8 @@ erDiagram
         Boolean isOnline
         String verificationStatus "PENDING | APPROVED | REJECTED"
         Float rating
+        Float latitude
+        Float longitude
     }
 
     Ride {
@@ -83,6 +85,8 @@ Extends the `User` model with driver-specific properties.
 | `isOnline` | `Boolean` | `@default(false)` | Flag showing if driver is accepting requests |
 | `verificationStatus` | `String` | - | Verification workflow state |
 | `rating` | `Float` | `@default(5.0)` | Running average rating |
+| `latitude` | `Float?` | Optional | Current latitude coordinate for live tracking |
+| `longitude` | `Float?` | Optional | Current longitude coordinate for live tracking |
 
 ### 3. Ride Model
 Represents the state and workflow tracking of a single ride booking.
