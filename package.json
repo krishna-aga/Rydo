@@ -11,6 +11,7 @@
     "db:push": "turbo run db:push"
   },
   "devDependencies": {
+    "dotenv-cli": "^11.0.0",
     "turbo": "^2.0.4",
     "typescript": "^5.4.5"
   }

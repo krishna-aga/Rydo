@@ -7,8 +7,8 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push"
+    "db:generate": "dotenv -e ../../.env -- prisma generate",
+    "db:push": "dotenv -e ../../.env -- prisma db push"
   },
   "dependencies": {
     "@prisma/client": "^5.14.0"

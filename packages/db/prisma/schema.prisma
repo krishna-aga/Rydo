@@ -7,9 +7,81 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum Role {
+  PASSENGER
+  DRIVER
+}
+
+enum RideStatus {
+  REQUESTED
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum VerificationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   name      String?
+  password  String
+  role      Role     @default(PASSENGER)
   createdAt DateTime @default(now())
+
+  // Relations
+  driverProfile Driver?
+  ridesRequested Ride[]   @relation("PassengerRides")
+  ratingsGiven   Rating[] @relation("PassengerRatings")
+}
+
+model Driver {
+  id                 String             @id @default(uuid())
+  userId             String             @unique
+  vehicleType        String
+  vehicleNumber      String
+  isOnline           Boolean            @default(false)
+  verificationStatus VerificationStatus @default(PENDING)
+  rating             Float              @default(5.0)
+
+  // Relations
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ridesAccepted Ride[]   @relation("DriverRides")
+  ratingsReceived Rating[] @relation("DriverRatings")
+}
+
+model Ride {
+  id             String     @id @default(uuid())
+  passengerId    String
+  driverId       String?
+  pickupLocation String
+  destination    String
+  status         RideStatus @default(REQUESTED)
+  fare           Float
+  createdAt      DateTime   @default(now())
+
+  // Relations
+  passenger User    @relation("PassengerRides", fields: [passengerId], references: [id])
+  driver    Driver? @relation("DriverRides", fields: [driverId], references: [id])
+  rating    Rating?
+}
+
+model Rating {
+  id          String   @id @default(uuid())
+  rideId      String   @unique
+  driverId    String
+  passengerId String
+  stars       Int
+  feedback    String?
+  createdAt   DateTime @default(now())
+
+  // Relations
+  ride      Ride   @relation(fields: [rideId], references: [id], onDelete: Cascade)
+  driver    Driver @relation("DriverRatings", fields: [driverId], references: [id], onDelete: Cascade)
+  passenger User   @relation("PassengerRatings", fields: [passengerId], references: [id], onDelete: Cascade)
 }

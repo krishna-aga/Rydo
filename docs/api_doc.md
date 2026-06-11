@@ -185,6 +185,96 @@ Cancels or rejects a ride workflow stage.
   }
   ```
 
+### 4. Fetch Active Ride
+Retrieves the current ongoing ride booking associated with the authenticated passenger or driver.
+- **URL**: `/api/rides/active`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "ride-uuid",
+      "passengerId": "passenger-uuid",
+      "driverId": "driver-uuid",
+      "pickupLocation": "Main Gate",
+      "destination": "Govind Bhawan",
+      "status": "ACCEPTED",
+      "fare": 50
+    }
+  }
+  ```
+
+### 5. Fetch Available Rides (Drivers Only)
+Retrieves a list of pending/requested ride bookings awaiting assignment.
+- **URL**: `/api/rides/available`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "ride-uuid",
+        "passengerId": "passenger-uuid",
+        "pickupLocation": "Main Gate",
+        "destination": "Govind Bhawan",
+        "status": "REQUESTED",
+        "fare": 50
+      }
+    ]
+  }
+  ```
+
+### 6. Progress Ride Status (Drivers Only)
+Progresses the ride lifecycle states (e.g. starting a ride or completing a ride).
+- **URL**: `/api/rides/:id/status`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+  ```json
+  {
+    "status": "IN_PROGRESS" // or "COMPLETED"
+  }
+  ```
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "ride-uuid",
+      "status": "IN_PROGRESS"
+    }
+  }
+  ```
+
+---
+
+## 🚗 Driver Online Listings (`/api/drivers`)
+
+### 1. Fetch Online Drivers
+Lists all drivers currently marked as online.
+- **URL**: `/api/drivers/online`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "driver-uuid",
+        "name": "Jane Driver",
+        "vehicleType": "E-Rickshaw",
+        "vehicleNumber": "UK-08-ER-1234",
+        "rating": 4.9
+      }
+    ]
+  }
+  ```
+
 ---
 
 ## ⭐ Ratings & Reviews (`/api/ratings`)
@@ -214,10 +304,3 @@ Submits passenger feedback for a completed ride.
     }
   }
   ```
- 
-
-
-
-
-
- 

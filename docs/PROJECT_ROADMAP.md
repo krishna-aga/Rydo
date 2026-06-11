@@ -95,140 +95,120 @@ Do not introduce Docker in this phase. ✅
 
 ---
 
-# Phase 2: Database Design
+# Phase 2: Database Design ✅
 
-Design Prisma schema.
+Design Prisma schema. ✅
 
 Tables:
 
-### User
+### User ✅
+* [x] id
+* [x] name
+* [x] email
+* [x] password
+* [x] role (PASSENGER or DRIVER)
+* [x] createdAt
 
-* id
-* name
-* email
-* password
-* role (PASSENGER or DRIVER)
-* createdAt
+### Driver ✅
+* [x] id
+* [x] userId
+* [x] vehicleType
+* [x] vehicleNumber
+* [x] isOnline
+* [x] verificationStatus
+* [x] rating
 
-### Driver
-
-* id
-* userId
-* vehicleType
-* vehicleNumber
-* isOnline
-* verificationStatus
-* rating
-
-### Ride
-
-* id
-* passengerId
-* driverId
-* pickupLocation
-* destination
-* status
-* fare
-* createdAt
+### Ride ✅
+* [x] id
+* [x] passengerId
+* [x] driverId
+* [x] pickupLocation
+* [x] destination
+* [x] status
+* [x] fare
+* [x] createdAt
 
 Ride status:
+* [x] REQUESTED
+* [x] ACCEPTED
+* [x] IN_PROGRESS
+* [x] COMPLETED
+* [x] CANCELLED
 
-* REQUESTED
-* ACCEPTED
-* IN_PROGRESS
-* COMPLETED
-* CANCELLED
+### Rating ✅
+* [x] id
+* [x] rideId
+* [x] driverId
+* [x] passengerId
+* [x] stars
+* [x] feedback
 
-### Rating
-
-* id
-* rideId
-* driverId
-* passengerId
-* stars
-* feedback
-
-Create migrations and relationships.
+Create migrations and relationships. ✅
 
 ---
 
-# Phase 3: Authentication
+# Phase 3: Authentication ✅
 
 Implement:
 
 Passenger:
-
-* Signup
-* Login
+* [x] Signup
+* [x] Login
 
 Driver:
-
-* Signup
-* Login
+* [x] Signup
+* [x] Login
 
 Use:
+* [x] JWT
+* [x] bcrypt (bcryptjs)
 
-* JWT
-* bcrypt
-
-Protected routes via middleware.
+Protected routes via middleware. ✅
 
 APIs:
-
-POST /auth/signup
-
-POST /auth/login
-
-GET /me
+* [x] POST /auth/signup
+* [x] POST /auth/login
+* [x] GET /me
 
 Frontend pages:
-
-* Login
-* Signup
+* [x] Login
+* [x] Signup
 
 ---
 
-# Phase 4: Driver Availability
+# Phase 4: Driver Availability ✅
 
 Drivers can:
+* [x] Go online
+* [x] Go offline
+* [x] Update availability
 
-* Go online
-* Go offline
-* Update availability
-
-Passengers can view available drivers.
+Passengers can view available drivers. ✅
 
 API:
-
-PATCH /driver/status
+* [x] PATCH /driver/status
 
 ---
 
-# Phase 5: Ride Request Workflow
+# Phase 5: Ride Request Workflow ✅
 
 Passenger:
-
-* Select pickup
-* Select destination
-* Request ride
+* [x] Select pickup
+* [x] Select destination
+* [x] Request ride
 
 Driver:
-
-* View incoming requests
-* Accept request
-* Reject request
+* [x] View incoming requests
+* [x] Accept request
+* [x] Reject request
 
 APIs:
+* [x] POST /ride/request
+* [x] POST /ride/accept
+* [x] POST /ride/reject (implemented via /rides/cancel)
 
-POST /ride/request
-
-POST /ride/accept
-
-POST /ride/reject
-
-Ensure only one driver can accept a ride.
-
-Use Prisma transactions to prevent race conditions.
+Ensure only one driver can accept a ride. ✅
+Use Prisma transactions to prevent race conditions. ✅
 
 ---
 
