@@ -8,9 +8,10 @@ import PassengerDashboard from '../PassengerDashboard/index.js';
 import DriverDashboard from '../DriverDashboard/index.js';
 import MapCanvas from '../../components/MapCanvas.js';
 import RatingModal from '../../components/RatingModal.js';
+import AnalyticsDashboard from '../AnalyticsDashboard/index.js';
 
 export default function Home() {
-  const { token, user, driver } = useAuthStore();
+  const { token, user, driver, activeTab } = useAuthStore();
   const {
     activeRide,
     onlineDrivers,
@@ -96,42 +97,48 @@ export default function Home() {
 
   return (
     <MainLayout>
-      {/* Sidebar containing dashboard controls */}
-      <Sidebar>
-        {user.role === 'PASSENGER' ? (
-          <PassengerDashboard />
-        ) : (
-          <DriverDashboard />
-        )}
-      </Sidebar>
+      {activeTab === 'operations' ? (
+        <>
+          {/* Sidebar containing dashboard controls */}
+          <Sidebar>
+            {user.role === 'PASSENGER' ? (
+              <PassengerDashboard />
+            ) : (
+              <DriverDashboard />
+            )}
+          </Sidebar>
 
-      {/* Spatial Canvas (Central Map view) */}
-      <main className="flex-1 h-full p-6 bg-slate-950 relative z-0">
-        <MapCanvas
-          pickupLocation={activeRide?.pickupLocation}
-          destination={activeRide?.destination}
-          onlineDrivers={
-            user.role === 'DRIVER' && driver && driver.isOnline
-              ? [
-                  ...onlineDrivers.filter((d) => d.id !== driver.id),
-                  {
-                    id: driver.id,
-                    name: user.name || 'You',
-                    vehicleType: driver.vehicleType,
-                    vehicleNumber: driver.vehicleNumber,
-                    rating: driver.rating,
-                    latitude: driver.latitude,
-                    longitude: driver.longitude
-                  }
-                ]
-              : onlineDrivers
-          }
-          assignedDriverId={activeRide?.driverId || undefined}
-        />
-      </main>
+          {/* Spatial Canvas (Central Map view) */}
+          <main className="flex-1 h-full p-6 bg-slate-950 relative z-0">
+            <MapCanvas
+              pickupLocation={activeRide?.pickupLocation}
+              destination={activeRide?.destination}
+              onlineDrivers={
+                user.role === 'DRIVER' && driver && driver.isOnline
+                  ? [
+                      ...onlineDrivers.filter((d) => d.id !== driver.id),
+                      {
+                        id: driver.id,
+                        name: user.name || 'You',
+                        vehicleType: driver.vehicleType,
+                        vehicleNumber: driver.vehicleNumber,
+                        rating: driver.rating,
+                        latitude: driver.latitude,
+                        longitude: driver.longitude
+                      }
+                    ]
+                  : onlineDrivers
+              }
+              assignedDriverId={activeRide?.driverId || undefined}
+            />
+          </main>
 
-      {/* Ratings Modal overlay for completed ride feedbacks */}
-      <RatingModal />
+          {/* Ratings Modal overlay for completed ride feedbacks */}
+          <RatingModal />
+        </>
+      ) : (
+        <AnalyticsDashboard />
+      )}
     </MainLayout>
   );
 }

@@ -1,7 +1,7 @@
 # Project Status
 
 **Current Date**: June 12, 2026  
-**Current Phase**: Phase 10 Completed (Moving to Phase 11)
+**Current Phase**: Phase 12 Completed (Moving to Phase 13)
 
 ---
 
@@ -19,7 +19,9 @@
 | **Phase 8** | Driver Dashboard | **Completed** | Displaying metrics, history logs, and Recharts earnings. |
 | **Phase 9** | Ratings and Feedback | **Completed** | Submit reviews and recalculate average driver rating. |
 | **Phase 10** | Maps Integration | **Completed** | Custom Leaflet spatial operations canvas map implemented in app. |
-| **Phases 11-18** | Analytics, Scheduling, AI, Prod, Docker, Deploy, Docs | *Pending* | Future feature sets. |
+| **Phase 11** | Analytics Dashboard | **Completed** | Visualizing rides, peak hours, and hotspots using Recharts. |
+| **Phase 12** | Scheduled Rides | **Completed** | Advanced transit booking system dispatched by background minute crons. |
+| **Phases 13-18** | AI, Prod, Redis, Docker, Deploy, Docs | *Pending* | Future feature sets. |
 
 ---
 

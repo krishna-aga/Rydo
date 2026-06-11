@@ -6,6 +6,7 @@ interface RideState {
   activeRide: Ride | null;
   availableRides: Ride[];
   onlineDrivers: any[];
+  scheduledRides: any[];
   loading: boolean;
   error: string | null;
   fetchActiveRide: (token: string) => Promise<void>;
@@ -16,12 +17,16 @@ interface RideState {
   progressRideStatus: (token: string, rideId: string, status: 'IN_PROGRESS' | 'COMPLETED') => Promise<boolean>;
   fetchAvailableRides: (token: string) => Promise<void>;
   fetchOnlineDrivers: (token: string) => Promise<void>;
+  scheduleNewRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number; scheduledTime: string }) => Promise<boolean>;
+  fetchUpcomingScheduledRides: (token: string) => Promise<void>;
+  cancelScheduledRide: (token: string, id: string) => Promise<boolean>;
 }
 
 export const useRideStore = create<RideState>((set) => ({
   activeRide: null,
   availableRides: [],
   onlineDrivers: [],
+  scheduledRides: [],
   loading: false,
   error: null,
 
@@ -150,6 +155,59 @@ export const useRideStore = create<RideState>((set) => ({
       }
     } catch (err) {
       console.error('Fetch online drivers error', err);
+    }
+  },
+
+  scheduleNewRide: async (token, payload) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await apiService.scheduleRide(token, payload);
+      if (data.success && data.data) {
+        set((state) => ({
+          scheduledRides: [...state.scheduledRides, data.data].sort(
+            (a: any, b: any) => new Date(a.scheduledTime).getTime() - new Date(b.scheduledTime).getTime()
+          ),
+          loading: false
+        }));
+        return true;
+      } else {
+        set({ error: data.error || 'Failed to schedule ride', loading: false });
+        return false;
+      }
+    } catch (err) {
+      set({ error: 'Server connection failed', loading: false });
+      return false;
+    }
+  },
+
+  fetchUpcomingScheduledRides: async (token) => {
+    try {
+      const data = await apiService.getUpcomingScheduledRides(token);
+      if (data.success && data.data) {
+        set({ scheduledRides: data.data });
+      }
+    } catch (err) {
+      console.error('Fetch scheduled rides error', err);
+    }
+  },
+
+  cancelScheduledRide: async (token, id) => {
+    set({ loading: true, error: null });
+    try {
+      const data = await apiService.cancelScheduledRide(token, id);
+      if (data.success) {
+        set((state) => ({
+          scheduledRides: state.scheduledRides.filter((r) => r.id !== id),
+          loading: false
+        }));
+        return true;
+      } else {
+        set({ error: data.error || 'Failed to cancel schedule', loading: false });
+        return false;
+      }
+    } catch (err) {
+      set({ error: 'Server connection failed', loading: false });
+      return false;
     }
   }
 }));

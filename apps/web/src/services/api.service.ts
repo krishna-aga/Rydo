@@ -55,6 +55,18 @@ export const apiService = {
     }),
   getAvailableRides: (token: string) => apiFetch<Ride[]>('/rides/available', token),
 
+  // Scheduling endpoints
+  scheduleRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number; scheduledTime: string }) => 
+    apiFetch<any>('/rides/schedule', token, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+  getUpcomingScheduledRides: (token: string) => apiFetch<any[]>('/rides/scheduled/upcoming', token),
+  cancelScheduledRide: (token: string, id: string) => 
+    apiFetch<any>(`/rides/scheduled/${id}`, token, {
+      method: 'DELETE'
+    }),
+
   // Driver endpoints
   updateDriverStatus: (token: string, isOnline: boolean) => 
     apiFetch<any>('/drivers/status', token, {
@@ -62,5 +74,8 @@ export const apiService = {
       body: JSON.stringify({ isOnline })
     }),
   getOnlineDrivers: (token: string) => apiFetch<any[]>('/drivers/online', token),
-  getDashboardStats: (token: string) => apiFetch<any>('/drivers/dashboard/stats', token)
+  getDashboardStats: (token: string) => apiFetch<any>('/drivers/dashboard/stats', token),
+
+  // Analytics endpoint
+  getAnalytics: (token: string) => apiFetch<any>('/analytics', token)
 };

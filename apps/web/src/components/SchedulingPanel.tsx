@@ -1,0 +1,203 @@
+import { useState, useEffect } from 'react';
+import { useAuthStore } from '../store/useAuthStore.js';
+import { useRideStore } from '../store/useRideStore.js';
+import { Button } from '@rydo/ui';
+
+export default function SchedulingPanel() {
+  const { token } = useAuthStore();
+  const {
+    scheduledRides,
+    scheduleNewRide,
+    fetchUpcomingScheduledRides,
+    cancelScheduledRide
+  } = useRideStore();
+
+  const [pickup, setPickup] = useState('Main Gate');
+  const [destination, setDestination] = useState('Govind Bhawan');
+  const [fare, setFare] = useState(40);
+  const [dateTime, setDateTime] = useState('');
+  const [booking, setBooking] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+  const [errMsg, setErrMsg] = useState('');
+
+  useEffect(() => {
+    if (token) {
+      fetchUpcomingScheduledRides(token);
+    }
+  }, [token]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSuccessMsg('');
+    setErrMsg('');
+
+    if (pickup === destination) {
+      setErrMsg('Pickup and destination cannot be the same');
+      return;
+    }
+
+    if (!dateTime) {
+      setErrMsg('Please select a date and time for your ride');
+      return;
+    }
+
+    const scheduledDate = new Date(dateTime);
+    if (scheduledDate <= new Date()) {
+      setErrMsg('Scheduled time must be in the future');
+      return;
+    }
+
+    setBooking(true);
+    const success = await scheduleNewRide(token!, {
+      pickupLocation: pickup,
+      destination,
+      fare,
+      scheduledTime: scheduledDate.toISOString()
+    });
+
+    setBooking(false);
+    if (success) {
+      setSuccessMsg('Ride scheduled successfully!');
+      setDateTime('');
+    } else {
+      setErrMsg('Failed to schedule ride. Try again.');
+    }
+  };
+
+  const handleCancel = async (id: string) => {
+    if (confirm('Are you sure you want to cancel this scheduled ride?')) {
+      await cancelScheduledRide(token!, id);
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Scheduling form */}
+      <div className="border border-slate-800 bg-slate-900/50 rounded-2xl p-5 space-y-4">
+        <h3 className="text-md font-bold text-slate-200">Schedule Future Transit</h3>
+        
+        {successMsg && (
+          <div className="bg-emerald-950/30 border border-emerald-900/50 text-emerald-300 rounded-xl p-3 text-xs font-semibold">
+            ✅ {successMsg}
+          </div>
+        )}
+
+        {errMsg && (
+          <div className="bg-rose-950/30 border border-rose-900/50 text-rose-300 rounded-xl p-3 text-xs font-semibold">
+            ⚠️ {errMsg}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Pickup Landmark</label>
+            <select
+              value={pickup}
+              onChange={(e) => setPickup(e.target.value)}
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
+            >
+              <option value="Main Gate">Main Gate</option>
+              <option value="Govind Bhawan">Govind Bhawan</option>
+              <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+              <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+              <option value="Lecture Hall Complex">Lecture Hall Complex</option>
+              <option value="Library">Library</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Destination Landmark</label>
+            <select
+              value={destination}
+              onChange={(e) => setDestination(e.target.value)}
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
+            >
+              <option value="Main Gate">Main Gate</option>
+              <option value="Govind Bhawan">Govind Bhawan</option>
+              <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+              <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+              <option value="Lecture Hall Complex">Lecture Hall Complex</option>
+              <option value="Library">Library</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Date & Time</label>
+            <input
+              type="datetime-local"
+              value={dateTime}
+              onChange={(e) => setDateTime(e.target.value)}
+              required
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
+            />
+          </div>
+
+          <div>
+            <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase mb-2">
+              <span>Fare Estimate</span>
+              <span className="text-indigo-400">₹{fare}</span>
+            </div>
+            <input
+              type="range"
+              min="20"
+              max="150"
+              step="5"
+              value={fare}
+              onChange={(e) => setFare(Number(e.target.value))}
+              className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+            />
+          </div>
+
+          <Button type="submit" disabled={booking} className="w-full py-3 mt-4">
+            {booking ? 'Scheduling...' : 'Reserve Ride'}
+          </Button>
+        </form>
+      </div>
+
+      {/* Upcoming Reservation list */}
+      <div className="border border-slate-800/80 bg-slate-950/40 rounded-2xl p-5">
+        <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Upcoming Reservations</h4>
+        <div className="space-y-3">
+          {scheduledRides.length > 0 ? (
+            scheduledRides.map((ride: any) => {
+              const formattedTime = new Date(ride.scheduledTime).toLocaleString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+              });
+
+              return (
+                <div key={ride.id} className="border border-slate-900 bg-slate-950/60 rounded-xl p-3.5 space-y-2.5">
+                  <div className="flex justify-between items-start">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-900 border border-slate-800 px-2 py-0.5 rounded">
+                      Pending
+                    </span>
+                    <span className="text-sm font-extrabold text-indigo-400 font-mono">₹{ride.fare}</span>
+                  </div>
+                  
+                  <div className="text-xs text-slate-300 space-y-1">
+                    <div>
+                      <span className="text-slate-500">Route: </span>
+                      <span className="font-semibold">{ride.pickupLocation} ➔ {ride.destination}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Due: </span>
+                      <span className="font-semibold text-slate-200">{formattedTime}</span>
+                    </div>
+                  </div>
+
+                  <Button variant="danger" className="w-full py-1.5 text-xs" onClick={() => handleCancel(ride.id)}>
+                    Cancel Reservation
+                  </Button>
+                </div>
+              );
+            })
+          ) : (
+            <div className="text-xs text-slate-500 text-center py-4">No upcoming scheduled transits.</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -14,6 +14,7 @@ erDiagram
     Ride ||--o{ Rating : "has reviews"
     User ||--o{ Rating : "submits reviews"
     Driver ||--o{ Rating : "receives reviews"
+    User ||--o{ ScheduledRide : "schedules as passenger"
 
     User {
         String id PK
@@ -54,6 +55,17 @@ erDiagram
         String passengerId FK
         Int stars
         String feedback
+    }
+
+    ScheduledRide {
+        String id PK
+        String passengerId FK
+        String pickupLocation
+        String destination
+        Float fare
+        DateTime scheduledTime
+        ScheduledRideStatus status "PENDING | DISPATCHED | CANCELLED"
+        DateTime createdAt
     }
 ```
 
@@ -113,6 +125,20 @@ Stores reviews submitted by passengers for completed rides.
 | `passengerId` | `String` | FK | Relation to `User.id` (Passenger) |
 | `stars` | `Int` | - | Numeric rating (1 - 5) |
 | `feedback` | `String?` | Optional | Written feedback text |
+
+### 5. ScheduledRide Model
+Represents rides reserved by passengers for future dispatch times.
+
+| Field | Type | Attributes | Description |
+|---|---|---|---|
+| `id` | `String` | `@id`, `@default(uuid())` | Primary key |
+| `passengerId` | `String` | FK | Relation to `User.id` (Passenger) |
+| `pickupLocation` | `String` | - | Pickup landmark |
+| `destination` | `String` | - | Destination landmark |
+| `fare` | `Float` | - | Estimated fare |
+| `scheduledTime` | `DateTime` | - | Future time when ride should go live |
+| `status` | `ScheduledRideStatus` | `Enum`, `@default(PENDING)` | Workflow state (`PENDING`, `DISPATCHED`, `CANCELLED`) |
+| `createdAt` | `DateTime` | `@default(now())` | Reservation creation timestamp |
 
 ---
 

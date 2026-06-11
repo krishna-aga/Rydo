@@ -420,3 +420,113 @@ Retrieves a chronological list of reviews and feedback submitted by passengers f
     ]
   }
   ```
+
+---
+
+## 📅 Ride Scheduling Routes (`/api/rides`)
+
+### 1. Schedule a Future Ride
+Reserves a ride for a future time.
+- **URL**: `/api/rides/schedule`
+- **Method**: `POST`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+  ```json
+  {
+    "pickupLocation": "Main Gate",
+    "destination": "Library",
+    "fare": 45.0,
+    "scheduledTime": "2026-06-12T14:30:00.000Z"
+  }
+  ```
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "scheduled-ride-uuid",
+      "passengerId": "passenger-uuid",
+      "pickupLocation": "Main Gate",
+      "destination": "Library",
+      "fare": 45,
+      "scheduledTime": "2026-06-12T14:30:00.000Z",
+      "status": "PENDING",
+      "createdAt": "2026-06-12T03:00:00.000Z"
+    }
+  }
+  ```
+
+### 2. Get Upcoming Reservations
+Lists pending future rides scheduled by the passenger.
+- **URL**: `/api/rides/scheduled/upcoming`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "scheduled-ride-uuid",
+        "passengerId": "passenger-uuid",
+        "pickupLocation": "Main Gate",
+        "destination": "Library",
+        "fare": 45,
+        "scheduledTime": "2026-06-12T14:30:00.000Z",
+        "status": "PENDING",
+        "createdAt": "2026-06-12T03:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+### 3. Cancel Reservation
+Cancels an upcoming scheduled ride.
+- **URL**: `/api/rides/scheduled/:id`
+- **Method**: `DELETE`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "scheduled-ride-uuid",
+      "status": "CANCELLED"
+    }
+  }
+  ```
+
+---
+
+## 📈 Analytics & Reporting (`/api/analytics`)
+
+### 1. Fetch Campus Analytics
+Retrieves system-wide transits counts, hourly peak demand patterns, and landmark usage metrics.
+- **URL**: `/api/analytics`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "overallStats": {
+        "totalRides": 250,
+        "completedRides": 210,
+        "cancelledRides": 40,
+        "totalRevenue": 9450,
+        "averageFare": 45.0
+      },
+      "dailyRides": [
+        { "day": "Mon", "date": "Jun 08", "count": 35, "revenue": 1575 }
+      ],
+      "peakHours": [
+        { "hour": "00:00", "count": 2 },
+        { "hour": "17:00", "count": 48 }
+      ],
+      "popularPickupPoints": [
+        { "location": "Main Gate", "count": 94 }
+      ]
+    }
+  }
+  ```

@@ -8,8 +8,10 @@ interface AuthState {
   driver: Driver | null;
   loading: boolean;
   error: string | null;
+  activeTab: 'operations' | 'analytics';
   setToken: (token: string | null) => void;
   setError: (error: string | null) => void;
+  setActiveTab: (tab: 'operations' | 'analytics') => void;
   login: (credentials: any) => Promise<boolean>;
   signup: (userData: any) => Promise<boolean>;
   logout: () => void;
@@ -22,6 +24,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   driver: null,
   loading: false,
   error: null,
+  activeTab: 'operations',
+
+  setActiveTab: (activeTab) => set({ activeTab }),
 
   setToken: (token) => {
     if (token) {
@@ -76,7 +81,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
 
   logout: () => {
     get().setToken(null);
-    set({ user: null, driver: null, error: null });
+    set({ user: null, driver: null, error: null, activeTab: 'operations' });
   },
 
   checkMe: async () => {

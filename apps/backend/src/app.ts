@@ -5,6 +5,7 @@ import driverRouter from './routes/drivers.js';
 import ridesRouter from './routes/rides.js';
 import ratingsRouter from './routes/ratings.js';
 import dashboardRouter from './routes/dashboard.js';
+import analyticsRouter from './routes/analytics.js';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use('/api/drivers', driverRouter);
 app.use('/api/rides', ridesRouter);
 app.use('/api/ratings', ratingsRouter);
 app.use('/api/drivers/dashboard', dashboardRouter);
+app.use('/api/analytics', analyticsRouter);
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {

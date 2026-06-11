@@ -20,6 +20,10 @@ const io = new Server(httpServer, {
 // Bind Socket.io globally to the express application
 app.set('io', io);
 
+// Initialize background cron jobs
+import { initCronJobs } from './lib/cron.js';
+initCronJobs(io);
+
 // Handle Socket.io Connections and Room Joins
 io.on('connection', (socket) => {
   const { userId, role } = socket.handshake.query;

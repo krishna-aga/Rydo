@@ -2,7 +2,7 @@ import { useAuthStore } from '../store/useAuthStore.js';
 import { Button } from '@rydo/ui';
 
 export default function Navbar() {
-  const { user, logout } = useAuthStore();
+  const { user, logout, activeTab, setActiveTab } = useAuthStore();
 
   if (!user) return null;
 
@@ -16,6 +16,30 @@ export default function Navbar() {
         <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest">
           {user.role} Control Panel
         </span>
+      </div>
+
+      {/* Tab Selectors */}
+      <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/80 shadow-inner">
+        <button
+          onClick={() => setActiveTab('operations')}
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
+            activeTab === 'operations'
+              ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 border-transparent'
+          }`}
+        >
+          Operations
+        </button>
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
+            activeTab === 'analytics'
+              ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
+              : 'text-slate-400 hover:text-slate-200 border-transparent'
+          }`}
+        >
+          Analytics
+        </button>
       </div>
 
       <div className="flex items-center gap-4">

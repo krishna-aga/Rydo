@@ -38,6 +38,7 @@ model User {
   driverProfile Driver?
   ridesRequested Ride[]   @relation("PassengerRides")
   ratingsGiven   Rating[] @relation("PassengerRatings")
+  scheduledRides ScheduledRide[] @relation("PassengerScheduledRides")
 }
 
 model Driver {
@@ -87,3 +88,24 @@ model Rating {
   driver    Driver @relation("DriverRatings", fields: [driverId], references: [id], onDelete: Cascade)
   passenger User   @relation("PassengerRatings", fields: [passengerId], references: [id], onDelete: Cascade)
 }
+
+enum ScheduledRideStatus {
+  PENDING
+  DISPATCHED
+  CANCELLED
+}
+
+model ScheduledRide {
+  id             String              @id @default(uuid())
+  passengerId    String
+  pickupLocation String
+  destination    String
+  fare           Float
+  scheduledTime  DateTime
+  status         ScheduledRideStatus @default(PENDING)
+  createdAt      DateTime            @default(now())
+
+  // Relations
+  passenger User @relation("PassengerScheduledRides", fields: [passengerId], references: [id], onDelete: Cascade)
+}
+
