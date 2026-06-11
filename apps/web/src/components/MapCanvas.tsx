@@ -134,13 +134,46 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
     if (pickupLocation && LANDMARK_COORDINATES[pickupLocation] && destination && LANDMARK_COORDINATES[destination]) {
       const pCoord = LANDMARK_COORDINATES[pickupLocation];
       const dCoord = LANDMARK_COORDINATES[destination];
-      const polyline = L.polyline([pCoord, dCoord], {
+
+      // Draw initial fallback straight dashed line
+      const fallbackPolyline = L.polyline([pCoord, dCoord], {
         color: '#6366f1',
         weight: 4,
-        opacity: 0.8,
-        dashArray: '8, 12'
+        opacity: 0.6,
+        dashArray: '6, 10'
       }).addTo(map);
-      routingPolylineRef.current = polyline;
+      routingPolylineRef.current = fallbackPolyline;
+
+      // Fetch actual street path from OSRM
+      fetch(`https://router.project-osrm.org/route/v1/driving/${pCoord[1]},${pCoord[0]};${dCoord[1]},${dCoord[0]}?overview=full&geometries=geojson`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.routes && data.routes[0] && data.routes[0].geometry) {
+            const routeCoords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]] as [number, number]);
+
+            // Remove fallback polyline
+            if (routingPolylineRef.current) {
+              routingPolylineRef.current.remove();
+            }
+
+            // Draw street-accurate polyline
+            const streetPolyline = L.polyline(routeCoords, {
+              color: '#818cf8',
+              weight: 5,
+              opacity: 0.95,
+              lineJoin: 'round',
+              lineCap: 'round'
+            }).addTo(map);
+            routingPolylineRef.current = streetPolyline;
+
+            // Adjust bounds to fit the full route and any assigned driver
+            const boundsPoints: [number, number][] = [...points, ...routeCoords];
+            map.fitBounds(L.latLngBounds(boundsPoints), { padding: [50, 50] });
+          }
+        })
+        .catch(err => {
+          console.error('Failed to fetch street route from OSRM:', err);
+        });
     }
 
     // Adjust bounds

@@ -7,7 +7,7 @@ import {
   getAvailableRides,
   progressRideStatus
 } from '../controllers/rides.controller.js';
-import { authenticateJWT } from '../middleware/auth.js';
+import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = Router();
 

@@ -2,7 +2,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '@rydo/db';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'rydo-super-secret-key-123456';
+import { env } from '../config/env.js';
+
+const JWT_SECRET = env.JWT_SECRET;
 
 export const registerUser = async (data: any) => {
   const { email, password, name, role, vehicleType, vehicleNumber } = data;

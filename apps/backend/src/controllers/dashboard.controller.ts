@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { fetchDashboardData } from '../services/dashboard.service.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 

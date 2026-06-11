@@ -1,7 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'rydo-super-secret-key-123456';
+import { env } from '../config/env.js';
+
+const JWT_SECRET = env.JWT_SECRET;
 
 export interface AuthenticatedRequest extends Request {
   user?: {

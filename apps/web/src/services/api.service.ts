@@ -61,5 +61,6 @@ export const apiService = {
       method: 'PATCH',
       body: JSON.stringify({ isOnline })
     }),
-  getOnlineDrivers: (token: string) => apiFetch<any[]>('/drivers/online', token)
+  getOnlineDrivers: (token: string) => apiFetch<any[]>('/drivers/online', token),
+  getDashboardStats: (token: string) => apiFetch<any>('/drivers/dashboard/stats', token)
 };

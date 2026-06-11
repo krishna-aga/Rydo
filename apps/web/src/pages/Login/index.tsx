@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { useAuthStore } from '../store/useAuthStore.js';
+import { useAuthStore } from '../../store/useAuthStore.js';
 import { Button } from '@rydo/ui';
 
-export default function AuthScreen() {
+export default function Login() {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

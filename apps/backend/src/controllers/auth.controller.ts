@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { registerUser, authenticateUser, getUserProfile } from '../services/auth.service.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 

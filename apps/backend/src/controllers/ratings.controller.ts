@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { executeSubmitRating, fetchDriverRatingsList } from '../services/ratings.service.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 

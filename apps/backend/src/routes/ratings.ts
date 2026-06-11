@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { submitRating, getDriverRatings } from '../controllers/ratings.controller.js';
-import { authenticateJWT } from '../middleware/auth.js';
+import { authenticateJWT } from '../middlewares/auth.js';
 
 const router = Router();
 

@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { AuthenticatedRequest } from '../middleware/auth.js';
+import { AuthenticatedRequest } from '../middlewares/auth.js';
 import { updateDriverStatus, updateDriverLocation, fetchOnlineDriversList } from '../services/drivers.service.js';
 import { successResponse, errorResponse } from '../utils/response.js';
 
