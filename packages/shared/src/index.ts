@@ -1,4 +1,4 @@
-export type Role = 'PASSENGER' | 'DRIVER';
+export type Role = 'PASSENGER' | 'DRIVER' | 'ADMIN';
 export type RideStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
@@ -18,6 +18,8 @@ export interface Driver {
   isOnline: boolean;
   verificationStatus: VerificationStatus;
   rating: number;
+  latitude?: number;
+  longitude?: number;
   user?: User;
 }
 
@@ -29,6 +31,7 @@ export interface Ride {
   destination: string;
   status: RideStatus;
   fare: number;
+  vehicleType: string;
   createdAt: string;
   passenger?: User;
   driver?: Driver;

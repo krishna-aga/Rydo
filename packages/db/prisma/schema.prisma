@@ -10,6 +10,7 @@ generator client {
 enum Role {
   PASSENGER
   DRIVER
+  ADMIN
 }
 
 enum RideStatus {
@@ -38,6 +39,7 @@ model User {
   driverProfile Driver?
   ridesRequested Ride[]   @relation("PassengerRides")
   ratingsGiven   Rating[] @relation("PassengerRatings")
+  scheduledRides ScheduledRide[] @relation("PassengerScheduledRides")
 }
 
 model Driver {
@@ -47,7 +49,9 @@ model Driver {
   vehicleNumber      String
   isOnline           Boolean            @default(false)
   verificationStatus VerificationStatus @default(PENDING)
-  rating             Float              @default(5.0)
+  rating             Float              @default(0.0)
+  latitude           Float?
+  longitude          Float?
 
   // Relations
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -63,6 +67,7 @@ model Ride {
   destination    String
   status         RideStatus @default(REQUESTED)
   fare           Float
+  vehicleType    String     @default("E-Rickshaw")
   createdAt      DateTime   @default(now())
 
   // Relations
@@ -85,3 +90,25 @@ model Rating {
   driver    Driver @relation("DriverRatings", fields: [driverId], references: [id], onDelete: Cascade)
   passenger User   @relation("PassengerRatings", fields: [passengerId], references: [id], onDelete: Cascade)
 }
+
+enum ScheduledRideStatus {
+  PENDING
+  DISPATCHED
+  CANCELLED
+}
+
+model ScheduledRide {
+  id             String              @id @default(uuid())
+  passengerId    String
+  pickupLocation String
+  destination    String
+  fare           Float
+  vehicleType    String              @default("E-Rickshaw")
+  scheduledTime  DateTime
+  status         ScheduledRideStatus @default(PENDING)
+  createdAt      DateTime            @default(now())
+
+  // Relations
+  passenger User @relation("PassengerScheduledRides", fields: [passengerId], references: [id], onDelete: Cascade)
+}
+

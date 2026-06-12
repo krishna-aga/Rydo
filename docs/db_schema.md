@@ -14,13 +14,14 @@ erDiagram
     Ride ||--o{ Rating : "has reviews"
     User ||--o{ Rating : "submits reviews"
     Driver ||--o{ Rating : "receives reviews"
+    User ||--o{ ScheduledRide : "schedules as passenger"
 
     User {
         String id PK
         String email UK
         String name
         String password
-        Role role "PASSENGER | DRIVER"
+        Role role "PASSENGER | DRIVER | ADMIN"
         DateTime createdAt
     }
 
@@ -32,6 +33,8 @@ erDiagram
         Boolean isOnline
         String verificationStatus "PENDING | APPROVED | REJECTED"
         Float rating
+        Float latitude
+        Float longitude
     }
 
     Ride {
@@ -42,6 +45,7 @@ erDiagram
         String destination
         RideStatus status "REQUESTED | ACCEPTED | IN_PROGRESS | COMPLETED | CANCELLED"
         Float fare
+        String vehicleType "E-Rickshaw | Golf Cart"
         DateTime createdAt
     }
 
@@ -52,6 +56,19 @@ erDiagram
         String passengerId FK
         Int stars
         String feedback
+        DateTime createdAt
+    }
+
+    ScheduledRide {
+        String id PK
+        String passengerId FK
+        String pickupLocation
+        String destination
+        Float fare
+        String vehicleType "E-Rickshaw | Golf Cart"
+        DateTime scheduledTime
+        ScheduledRideStatus status "PENDING | DISPATCHED | CANCELLED"
+        DateTime createdAt
     }
 ```
 
@@ -68,7 +85,7 @@ Represents any account registered on the platform. Can be either a Passenger or 
 | `email` | `String` | `@unique` | Login email identifier |
 | `name` | `String?` | Optional | User's full name |
 | `password` | `String` | - | Hashed password string |
-| `role` | `Role` | `Enum (PASSENGER, DRIVER)` | Designates user profile privileges |
+| `role` | `Role` | `Enum (PASSENGER, DRIVER, ADMIN)` | Designates user profile privileges |
 | `createdAt` | `DateTime` | `@default(now())` | Creation timestamp |
 
 ### 2. Driver Model
@@ -78,11 +95,13 @@ Extends the `User` model with driver-specific properties.
 |---|---|---|---|
 | `id` | `String` | `@id`, `@default(uuid())` | Primary key |
 | `userId` | `String` | `@unique`, FK | Relation to `User.id` |
-| `vehicleType` | `String` | - | E.g., "E-Rickshaw" |
+| `vehicleType` | `String` | - | E.g., "E-Rickshaw" or "Golf Cart" |
 | `vehicleNumber` | `String` | - | License plate number |
 | `isOnline` | `Boolean` | `@default(false)` | Flag showing if driver is accepting requests |
 | `verificationStatus` | `String` | - | Verification workflow state |
-| `rating` | `Float` | `@default(5.0)` | Running average rating |
+| `rating` | `Float` | `@default(0.0)` | Running average rating |
+| `latitude` | `Float?` | Optional | Current latitude coordinate for live tracking |
+| `longitude` | `Float?` | Optional | Current longitude coordinate for live tracking |
 
 ### 3. Ride Model
 Represents the state and workflow tracking of a single ride booking.
@@ -96,6 +115,7 @@ Represents the state and workflow tracking of a single ride booking.
 | `destination` | `String` | - | Destination coordinates or landmark |
 | `status` | `RideStatus` | `Enum`, `@default(REQUESTED)` | Workflow state |
 | `fare` | `Float` | - | Estimated/calculated fare |
+| `vehicleType` | `String` | `@default("E-Rickshaw")` | Chosen vehicle type ("E-Rickshaw" or "Golf Cart") |
 | `createdAt` | `DateTime` | `@default(now())` | Request timestamp |
 
 ### 4. Rating Model
@@ -109,6 +129,22 @@ Stores reviews submitted by passengers for completed rides.
 | `passengerId` | `String` | FK | Relation to `User.id` (Passenger) |
 | `stars` | `Int` | - | Numeric rating (1 - 5) |
 | `feedback` | `String?` | Optional | Written feedback text |
+| `createdAt` | `DateTime` | `@default(now())` | Submission timestamp |
+
+### 5. ScheduledRide Model
+Represents rides reserved by passengers for future dispatch times.
+
+| Field | Type | Attributes | Description |
+|---|---|---|---|
+| `id` | `String` | `@id`, `@default(uuid())` | Primary key |
+| `passengerId` | `String` | FK | Relation to `User.id` (Passenger) |
+| `pickupLocation` | `String` | - | Pickup landmark |
+| `destination` | `String` | - | Destination landmark |
+| `fare` | `Float` | - | Estimated fare |
+| `vehicleType` | `String` | `@default("E-Rickshaw")` | Chosen vehicle type ("E-Rickshaw" or "Golf Cart") |
+| `scheduledTime` | `DateTime` | - | Future time when ride should go live |
+| `status` | `ScheduledRideStatus` | `Enum`, `@default(PENDING)` | Workflow state (`PENDING`, `DISPATCHED`, `CANCELLED`) |
+| `createdAt` | `DateTime` | `@default(now())` | Reservation creation timestamp |
 
 ---
 
