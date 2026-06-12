@@ -17,7 +17,7 @@ import adminRouter from './routes/admin.js';
 
 const app = express();
 
-const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000","https://rydo-k1l4.onrender.com"];
 if (env.CLIENT_URL) {
   const additional = env.CLIENT_URL.split(',').map(url => url.trim());
   additional.forEach(origin => {
