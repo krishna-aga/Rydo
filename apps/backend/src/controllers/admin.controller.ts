@@ -23,6 +23,15 @@ export const verifyDriver = async (req: AuthenticatedRequest, res: Response) => 
 
   try {
     const updated = await verifyDriverProfile(id, status);
+
+    // Notify the driver in real-time
+    const io = req.app.get('io');
+    if (io) {
+      io.to(`user_${updated.userId}`).emit('driver-verification-updated', {
+        verificationStatus: updated.verificationStatus
+      });
+    }
+
     return res.json(successResponse({
       id: updated.id,
       name: updated.user.name,

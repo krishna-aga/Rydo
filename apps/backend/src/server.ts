@@ -63,6 +63,12 @@ io.on('connection', (socket) => {
         console.error('Error fetching driver vehicle type for room join:', err);
       });
     }
+
+    // If admin, join the admins group to receive verification notifications
+    if (role === 'ADMIN') {
+      socket.join('admins');
+      console.log(`🔌 Admin ${userId} joined room: admins`);
+    }
   }
 
   socket.on('disconnect', () => {
