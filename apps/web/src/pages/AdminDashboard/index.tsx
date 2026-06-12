@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useSocketStore } from '../../store/useSocketStore.js';
+import { apiFetch } from '../../services/api.service.js';
 
 export default function AdminDashboard() {
   const { token } = useAuthStore();
@@ -14,14 +15,9 @@ export default function AdminDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch('http://localhost:5000/api/admin/drivers/pending', {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-      const data = await res.json();
+      const data = await apiFetch<any[]>('/admin/drivers/pending', token);
       if (data.success) {
-        setDrivers(data.data);
+        setDrivers(data.data || []);
       } else {
         setError(data.error || 'Failed to fetch pending registration requests');
       }
@@ -39,15 +35,10 @@ export default function AdminDashboard() {
   const handleVerify = async (driverId: string, status: 'APPROVED' | 'REJECTED') => {
     if (!token) return;
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/drivers/${driverId}/verify`, {
+      const data = await apiFetch<any>(`/admin/drivers/${driverId}/verify`, token, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({ status })
       });
-      const data = await res.json();
       if (data.success) {
         addToast(
           `Driver application ${status === 'APPROVED' ? 'Approved' : 'Rejected'} successfully!`,

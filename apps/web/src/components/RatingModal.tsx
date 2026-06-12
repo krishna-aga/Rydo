@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useSocketStore } from '../store/useSocketStore.js';
 import { useAuthStore } from '../store/useAuthStore.js';
 import { Button } from '@rydo/ui';
+import { apiFetch } from '../services/api.service.js';
 
 export default function RatingModal() {
   const { token } = useAuthStore();
@@ -16,19 +17,14 @@ export default function RatingModal() {
 
     setSubmitting(true);
     try {
-      const res = await fetch('http://localhost:5000/api/ratings', {
+      const data = await apiFetch<any>('/ratings', token, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
         body: JSON.stringify({
           rideId: ratingRideId,
           stars,
           feedback
         })
       });
-      const data = await res.json();
       if (data.success) {
         closeRatingModal();
       } else {

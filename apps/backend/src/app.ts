@@ -17,7 +17,27 @@ import adminRouter from './routes/admin.js';
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+if (env.CLIENT_URL) {
+  const additional = env.CLIENT_URL.split(',').map(url => url.trim());
+  additional.forEach(origin => {
+    if (origin && !allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  });
+}
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true
+}));
 app.use(express.json());
 
 // Log environment status on start to prevent unused warning
