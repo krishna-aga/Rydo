@@ -3,17 +3,29 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import app from './app.js';
 import { prisma } from '@rydo/db';
+import { env } from './config/env.js';
 
 // Load root .env file
 dotenv.config({ path: '../../.env' });
 
 const port = process.env.PORT || 5000;
 
+// Set up CORS allowed origins dynamic lookup
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+if (env.CLIENT_URL) {
+  const additional = env.CLIENT_URL.split(',').map(url => url.trim());
+  additional.forEach(origin => {
+    if (origin && !allowedOrigins.includes(origin)) {
+      allowedOrigins.push(origin);
+    }
+  });
+}
+
 // Set up HTTP Server and Socket.io
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ["http://localhost:3000", "http://127.0.0.1:3000"],
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PATCH", "DELETE"]
   }
 });

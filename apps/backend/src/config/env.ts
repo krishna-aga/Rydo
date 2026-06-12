@@ -8,7 +8,8 @@ const envSchema = z.object({
   JWT_SECRET: z.string().default('rydo-super-secret-key-123456'),
   DATABASE_URL: z.string({
     required_error: 'DATABASE_URL environment variable is required'
-  })
+  }),
+  CLIENT_URL: z.string().default('http://localhost:3000')
 });
 
 const parsed = envSchema.safeParse(process.env);

@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useAuthStore } from '../../store/useAuthStore.js';
 import { useRideStore } from '../../store/useRideStore.js';
 import { useSocketStore } from '../../store/useSocketStore.js';
+import { apiFetch } from '../../services/api.service.js';
 import MainLayout from '../../layouts/MainLayout.js';
 import Sidebar from '../../layouts/Sidebar.js';
 import PassengerDashboard from '../PassengerDashboard/index.js';
@@ -57,12 +58,8 @@ export default function Home() {
 
     const sendLocationUpdate = async (lat: number, lng: number) => {
       try {
-        await fetch('http://localhost:5000/api/drivers/location', {
+        await apiFetch<any>('/drivers/location', token, {
           method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`
-          },
           body: JSON.stringify({ latitude: lat, longitude: lng })
         });
       } catch (err) {

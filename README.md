@@ -119,3 +119,44 @@ Once started:
 - **Frontend Client App (Vercel)**: [https://rydo-web.vercel.app/](https://rydo-web.vercel.app/)
 - **Backend Express Server (Render)**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
 - **API Swagger Documentation**: [https://rydo-k1l4.onrender.com/api-docs](https://rydo-k1l4.onrender.com/api-docs)
+
+---
+
+## 🔑 Admin Console & Production Configuration
+
+The **Admin Control Panel** is integrated directly into the core React client package (`apps/web`). It is fully client-side driven and routes/views are automatically deployed whenever you deploy the frontend to Vercel.
+
+### 1. Accessing the Admin Console
+To access the verification queue and admin metrics dashboard:
+1. Navigate to the deployed client url (e.g. `https://rydo-web.vercel.app/`).
+2. Log in using an account that has its `role` set to `ADMIN` (such as `admin@rydo.com`).
+3. The platform will automatically redirect you to the Admin Console view instead of standard passenger/driver sidebars.
+
+### 2. Creating or Upgrading an Admin User
+If you want to grant admin access to another account, you can update its database role:
+- **Local Database / Studio**:
+  Run Prisma Studio from your root directory to view and edit tables:
+  ```bash
+  npx prisma studio --schema=packages/db/prisma/schema.prisma
+  ```
+  Find the target user row in the `User` table, modify its `role` column to `ADMIN`, and click **Save 1 change**.
+- **Neon Console (Production)**:
+  Execute a direct SQL query against your database cluster in the Neon SQL Editor:
+  ```sql
+  UPDATE "User" SET role = 'ADMIN' WHERE email = 'target-email@example.com';
+  ```
+
+### 3. Deploying & Environment Variable Configuration
+To ensure real-time socket connections and API fetches resolve successfully across your production sites, configure the following variables on their respective hosting platforms:
+
+#### A. Frontend Configuration (Vercel)
+Set these custom environment variables under your Vercel Project Settings:
+- `VITE_API_URL`: The production API server address (e.g., `https://rydo-k1l4.onrender.com/api`).
+- `VITE_SOCKET_URL`: The production real-time socket server address (e.g., `https://rydo-k1l4.onrender.com`).
+
+#### B. Backend CORS Configuration (Render)
+To resolve CORS blocks from your client domain, configure these variables in your Render Web Service settings:
+- `CLIENT_URL`: A comma-separated list of origins permitted to communicate with your backend. (e.g., `https://rydo-web.vercel.app,http://localhost:3000`).
+- `PORT`: Configured by Render (defaulting to port `5000` locally).
+- `DATABASE_URL`: Your live Neon PostgreSQL connection string.
+
