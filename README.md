@@ -100,3 +100,10 @@ pnpm dev
 - Web Client: [http://localhost:3000](http://localhost:3000)
 - Express Server API: [http://localhost:5000](http://localhost:5000)
 - Watch compiles active changes in `@rydo/shared` and `@rydo/ui` on the fly.
+
+---
+
+## 🌐 Live Deployments
+
+- **Backend Express Server**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
+- **API Swagger Documentation**: [https://rydo-k1l4.onrender.com/api-docs](https://rydo-k1l4.onrender.com/api-docs)

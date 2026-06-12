@@ -7,6 +7,10 @@ export const swaggerDocument = {
   },
   servers: [
     {
+      url: 'https://rydo-k1l4.onrender.com',
+      description: 'Production server'
+    },
+    {
       url: 'http://localhost:5000',
       description: 'Development server'
     }
@@ -165,10 +169,11 @@ export const swaggerDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['pickupLocation', 'destination', 'fare'],
+                required: ['pickupLocation', 'destination', 'vehicleType'],
                 properties: {
                   pickupLocation: { type: 'string' },
                   destination: { type: 'string' },
+                  vehicleType: { type: 'string', enum: ['E-Rickshaw', 'Golf Cart'] },
                   fare: { type: 'number' }
                 }
               }
@@ -285,12 +290,13 @@ export const swaggerDocument = {
             'application/json': {
               schema: {
                 type: 'object',
-                required: ['pickupLocation', 'destination', 'fare', 'scheduledTime'],
+                required: ['pickupLocation', 'destination', 'vehicleType', 'scheduledTime'],
                 properties: {
                   pickupLocation: { type: 'string' },
                   destination: { type: 'string' },
-                  fare: { type: 'number' },
-                  scheduledTime: { type: 'string', format: 'date-time' }
+                  vehicleType: { type: 'string', enum: ['E-Rickshaw', 'Golf Cart'] },
+                  scheduledTime: { type: 'string', format: 'date-time' },
+                  fare: { type: 'number' }
                 }
               }
             }
