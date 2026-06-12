@@ -7,7 +7,9 @@ export const signupSchema = z.object({
   role: z.enum(['PASSENGER', 'DRIVER'], {
     errorMap: () => ({ message: "Role must be either 'PASSENGER' or 'DRIVER'" })
   }),
-  vehicleType: z.string().optional(),
+  vehicleType: z.enum(['E-Rickshaw', 'Golf Cart'], {
+    errorMap: () => ({ message: "Vehicle type must be either 'E-Rickshaw' or 'Golf Cart'" })
+  }).optional(),
   vehicleNumber: z.string().optional()
 }).refine((data) => {
   if (data.role === 'DRIVER') {

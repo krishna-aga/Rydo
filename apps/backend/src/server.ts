@@ -2,6 +2,7 @@ import dotenv from 'dotenv';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import app from './app.js';
+import { prisma } from '@rydo/db';
 
 // Load root .env file
 dotenv.config({ path: '../../.env' });
@@ -37,6 +38,18 @@ io.on('connection', (socket) => {
     if (role === 'DRIVER') {
       socket.join('drivers');
       console.log(`🔌 Driver ${userId} joined room: drivers`);
+
+      // Look up driver's vehicle type to join vehicle-specific room
+      prisma.driver.findUnique({
+        where: { userId: userId as string }
+      }).then((driver) => {
+        if (driver) {
+          socket.join(`drivers_${driver.vehicleType}`);
+          console.log(`🔌 Driver ${userId} joined vehicle room: drivers_${driver.vehicleType}`);
+        }
+      }).catch((err) => {
+        console.error('Error fetching driver vehicle type for room join:', err);
+      });
     }
   }
 

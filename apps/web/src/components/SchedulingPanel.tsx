@@ -20,7 +20,7 @@ export default function SchedulingPanel() {
 
   const [pickup, setPickup] = useState('Main Gate');
   const [destination, setDestination] = useState('Govind Bhawan');
-  const [fare, setFare] = useState(40);
+  const [vehicleType, setVehicleType] = useState('E-Rickshaw');
   const [dateTime, setDateTime] = useState('');
   const [booking, setBooking] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -72,7 +72,7 @@ export default function SchedulingPanel() {
     const success = await scheduleNewRide(token!, {
       pickupLocation: pickup,
       destination,
-      fare,
+      vehicleType,
       scheduledTime: scheduledDate.toISOString()
     });
 
@@ -226,19 +226,39 @@ export default function SchedulingPanel() {
           </div>
 
           <div>
-            <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase mb-2">
-              <span>Fare Estimate</span>
-              <span className="text-indigo-400">₹{fare}</span>
+            <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Select Vehicle Type</label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setVehicleType('E-Rickshaw')}
+                className={`p-3 rounded-xl border text-left flex flex-col justify-between h-20 transition-all duration-200 ${
+                  vehicleType === 'E-Rickshaw'
+                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 shadow-inner'
+                    : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                }`}
+              >
+                <span className="text-lg">🛺</span>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold">E-Rickshaw</span>
+                  <span className="text-xs font-extrabold font-mono mt-0.5 text-indigo-400">₹10</span>
+                </div>
+              </button>
+              <button
+                type="button"
+                onClick={() => setVehicleType('Golf Cart')}
+                className={`p-3 rounded-xl border text-left flex flex-col justify-between h-20 transition-all duration-200 ${
+                  vehicleType === 'Golf Cart'
+                    ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 shadow-inner'
+                    : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                }`}
+              >
+                <span className="text-lg">🚐</span>
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold">Golf Cart</span>
+                  <span className="text-xs font-extrabold font-mono mt-0.5 text-indigo-400">₹8</span>
+                </div>
+              </button>
             </div>
-            <input
-              type="range"
-              min="20"
-              max="150"
-              step="5"
-              value={fare}
-              onChange={(e) => setFare(Number(e.target.value))}
-              className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-            />
           </div>
 
           <Button type="submit" disabled={booking} className="w-full py-3 mt-4">
@@ -272,7 +292,11 @@ export default function SchedulingPanel() {
                   <div className="text-xs text-slate-300 space-y-1">
                     <div>
                       <span className="text-slate-500">Route: </span>
-                      <span className="font-semibold">{ride.pickupLocation} ➔ {ride.destination}</span>
+                      <span className="font-semibold text-slate-200">{ride.pickupLocation} ➔ {ride.destination}</span>
+                    </div>
+                    <div>
+                      <span className="text-slate-500">Vehicle: </span>
+                      <span className="font-semibold text-slate-200">{ride.vehicleType}</span>
                     </div>
                     <div>
                       <span className="text-slate-500">Due: </span>

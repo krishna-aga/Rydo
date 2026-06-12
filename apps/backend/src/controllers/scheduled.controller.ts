@@ -8,14 +8,14 @@ export const bookSchedule = async (req: AuthenticatedRequest, res: Response) => 
     return res.status(401).json(errorResponse('Unauthorized'));
   }
 
-  const { pickupLocation, destination, fare, scheduledTime } = req.body;
+  const { pickupLocation, destination, vehicleType, scheduledTime } = req.body;
 
-  if (!pickupLocation || !destination || !fare || !scheduledTime) {
-    return res.status(400).json(errorResponse('pickupLocation, destination, fare, and scheduledTime are required'));
+  if (!pickupLocation || !destination || !vehicleType || !scheduledTime) {
+    return res.status(400).json(errorResponse('pickupLocation, destination, vehicleType, and scheduledTime are required'));
   }
 
   try {
-    const data = await createScheduledRide(req.user.id, { pickupLocation, destination, fare, scheduledTime });
+    const data = await createScheduledRide(req.user.id, { pickupLocation, destination, vehicleType, scheduledTime });
     return res.json(successResponse(data));
   } catch (err: any) {
     console.error('Book schedule error:', err);

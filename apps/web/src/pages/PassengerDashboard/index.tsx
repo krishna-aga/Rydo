@@ -22,7 +22,7 @@ export default function PassengerDashboard() {
   const [mode, setMode] = useState<'now' | 'schedule'>('now');
   const [pickup, setPickup] = useState('Main Gate');
   const [destination, setDestination] = useState('Govind Bhawan');
-  const [fare, setFare] = useState(40);
+  const [vehicleType, setVehicleType] = useState('E-Rickshaw');
 
   // Synchronize location selections from map-clicking state
   useEffect(() => {
@@ -45,7 +45,7 @@ export default function PassengerDashboard() {
       alert('Pickup and destination cannot be the same');
       return;
     }
-    await requestRide(token!, { pickupLocation: pickup, destination, fare });
+    await requestRide(token!, { pickupLocation: pickup, destination, vehicleType });
   };
 
   const handleUseCurrentLocation = () => {
@@ -183,19 +183,39 @@ export default function PassengerDashboard() {
                   </div>
 
                   <div>
-                    <div className="flex justify-between text-xs font-semibold text-slate-400 uppercase mb-2">
-                      <span>Fare Estimate</span>
-                      <span className="text-indigo-400">₹{fare}</span>
+                    <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Select Vehicle Type</label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setVehicleType('E-Rickshaw')}
+                        className={`p-3 rounded-xl border text-left flex flex-col justify-between h-20 transition-all duration-200 ${
+                          vehicleType === 'E-Rickshaw'
+                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 shadow-inner'
+                            : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className="text-lg">🛺</span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold">E-Rickshaw</span>
+                          <span className="text-xs font-extrabold font-mono mt-0.5 text-indigo-400">₹10</span>
+                        </div>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setVehicleType('Golf Cart')}
+                        className={`p-3 rounded-xl border text-left flex flex-col justify-between h-20 transition-all duration-200 ${
+                          vehicleType === 'Golf Cart'
+                            ? 'border-indigo-500 bg-indigo-500/10 text-indigo-400 shadow-inner'
+                            : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                        }`}
+                      >
+                        <span className="text-lg">🚐</span>
+                        <div className="flex flex-col">
+                          <span className="text-xs font-semibold">Golf Cart</span>
+                          <span className="text-xs font-extrabold font-mono mt-0.5 text-indigo-400">₹8</span>
+                        </div>
+                      </button>
                     </div>
-                    <input
-                      type="range"
-                      min="20"
-                      max="150"
-                      step="5"
-                      value={fare}
-                      onChange={(e) => setFare(Number(e.target.value))}
-                      className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
-                    />
                   </div>
 
                   <Button type="submit" className="w-full py-3 mt-4">
@@ -258,13 +278,13 @@ export default function PassengerDashboard() {
             {activeRide.status === 'REQUESTED' && (
               <div className="flex flex-col items-center justify-center py-6 text-center space-y-3">
                 <div className="w-10 h-10 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                <span className="text-xs text-slate-400">Matching with nearby E-Rickshaws...</span>
+                <span className="text-xs text-slate-400">Matching with nearby {activeRide.vehicleType}s...</span>
               </div>
             )}
 
             {activeRide.status !== 'REQUESTED' && activeRide.driver && (
               <div className="border-t border-slate-800 pt-4 space-y-3">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assigned E-Rickshaw</h4>
+                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-widest">Assigned {activeRide.vehicleType}</h4>
                 <div className="flex justify-between items-center bg-slate-950/40 border border-slate-800/80 rounded-xl p-3.5">
                   <div>
                     <div className="font-bold text-slate-200">{activeRide.driver.user?.name || 'Assigned Driver'}</div>

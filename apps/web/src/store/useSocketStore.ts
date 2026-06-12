@@ -9,17 +9,28 @@ interface Toast {
   message: string;
 }
 
+interface NotificationItem {
+  id: string;
+  type: 'info' | 'success' | 'warning' | 'error';
+  message: string;
+  timestamp: Date;
+  read: boolean;
+}
+
 interface SocketState {
   socket: Socket | null;
   connected: boolean;
   showRatingModal: boolean;
   ratingRideId: string | null;
   toasts: Toast[];
+  notifications: NotificationItem[];
   addToast: (message: string, type?: Toast['type']) => void;
   removeToast: (id: string) => void;
   connectSocket: (userId: string, role: 'PASSENGER' | 'DRIVER') => void;
   disconnectSocket: () => void;
   closeRatingModal: () => void;
+  markAllAsRead: () => void;
+  clearNotifications: () => void;
 }
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
@@ -40,10 +51,17 @@ export const useSocketStore = create<SocketState>((set, get) => ({
   showRatingModal: false,
   ratingRideId: null,
   toasts: [],
+  notifications: [],
 
   addToast: (message, type = 'info') => {
     const id = Math.random().toString(36).substring(2, 9);
-    set((state) => ({ toasts: [...state.toasts, { id, message, type }] }));
+    set((state) => ({
+      toasts: [...state.toasts, { id, message, type }],
+      notifications: [
+        { id, message, type, timestamp: new Date(), read: false },
+        ...state.notifications
+      ]
+    }));
     setTimeout(() => {
       get().removeToast(id);
     }, 6000);
@@ -51,6 +69,16 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
   removeToast: (id) => {
     set((state) => ({ toasts: state.toasts.filter((t) => t.id !== id) }));
+  },
+
+  markAllAsRead: () => {
+    set((state) => ({
+      notifications: state.notifications.map((n) => ({ ...n, read: true }))
+    }));
+  },
+
+  clearNotifications: () => {
+    set({ notifications: [] });
   },
 
   connectSocket: (userId, role) => {

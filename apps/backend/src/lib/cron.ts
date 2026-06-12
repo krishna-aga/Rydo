@@ -13,9 +13,9 @@ export const initCronJobs = (io: Server) => {
       if (dispatchedRides.length > 0) {
         console.log(`⏰ Dispatched ${dispatchedRides.length} scheduled rides!`);
 
-        // Broadcast each ride-requested event to all online drivers
+        // Broadcast each ride-requested event to online drivers of the requested vehicle type
         dispatchedRides.forEach((ride) => {
-          io.to('drivers').emit('ride-requested', {
+          io.to(`drivers_${ride.vehicleType}`).emit('ride-requested', {
             id: ride.id,
             passengerId: ride.passengerId,
             passenger: {
@@ -26,13 +26,14 @@ export const initCronJobs = (io: Server) => {
             destination: ride.destination,
             status: ride.status,
             fare: ride.fare,
+            vehicleType: ride.vehicleType,
             createdAt: ride.createdAt.toISOString()
           });
 
           // Also notify the individual passenger that their ride has been dispatched
           io.to(`user_${ride.passengerId}`).emit('ride-dispatch-status', {
             success: true,
-            message: 'Your scheduled E-Rickshaw has been dispatched and is looking for a driver!',
+            message: `Your scheduled ${ride.vehicleType} has been dispatched and is looking for a driver!`,
             ride
           });
         });

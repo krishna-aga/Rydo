@@ -16,14 +16,14 @@ interface RideState {
   setTempPickup: (value: string | null) => void;
   setTempDestination: (value: string | null) => void;
   fetchActiveRide: (token: string) => Promise<void>;
-  requestRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number }) => Promise<boolean>;
+  requestRide: (token: string, payload: { pickupLocation: string; destination: string; vehicleType: string; fare?: number }) => Promise<boolean>;
   acceptRide: (token: string, rideId: string) => Promise<boolean>;
   cancelRide: (token: string, rideId: string) => Promise<boolean>;
   updateDriverStatus: (token: string, isOnline: boolean) => Promise<boolean>;
   progressRideStatus: (token: string, rideId: string, status: 'IN_PROGRESS' | 'COMPLETED') => Promise<boolean>;
   fetchAvailableRides: (token: string) => Promise<void>;
   fetchOnlineDrivers: (token: string) => Promise<void>;
-  scheduleNewRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number; scheduledTime: string }) => Promise<boolean>;
+  scheduleNewRide: (token: string, payload: { pickupLocation: string; destination: string; vehicleType: string; fare?: number; scheduledTime: string }) => Promise<boolean>;
   fetchUpcomingScheduledRides: (token: string) => Promise<void>;
   cancelScheduledRide: (token: string, id: string) => Promise<boolean>;
 }

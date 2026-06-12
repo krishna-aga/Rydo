@@ -67,6 +67,7 @@ model Ride {
   destination    String
   status         RideStatus @default(REQUESTED)
   fare           Float
+  vehicleType    String     @default("E-Rickshaw")
   createdAt      DateTime   @default(now())
 
   // Relations
@@ -102,6 +103,7 @@ model ScheduledRide {
   pickupLocation String
   destination    String
   fare           Float
+  vehicleType    String              @default("E-Rickshaw")
   scheduledTime  DateTime
   status         ScheduledRideStatus @default(PENDING)
   createdAt      DateTime            @default(now())

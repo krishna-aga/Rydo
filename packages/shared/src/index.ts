@@ -31,6 +31,7 @@ export interface Ride {
   destination: string;
   status: RideStatus;
   fare: number;
+  vehicleType: string;
   createdAt: string;
   passenger?: User;
   driver?: Driver;

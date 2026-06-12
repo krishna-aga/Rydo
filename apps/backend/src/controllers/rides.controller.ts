@@ -9,25 +9,26 @@ import {
   updateRideStatusLifecycle
 } from '../services/rides.service.js';
 import { successResponse, errorResponse } from '../utils/response.js';
+import { prisma } from '@rydo/db';
 
 export const requestRide = async (req: AuthenticatedRequest, res: Response) => {
-  const { pickupLocation, destination, fare } = req.body;
+  const { pickupLocation, destination, vehicleType } = req.body;
 
   if (!req.user || req.user.role !== 'PASSENGER') {
     return res.status(403).json(errorResponse('Access denied: Only passengers can request rides'));
   }
 
-  if (!pickupLocation || !destination || !fare) {
-    return res.status(400).json(errorResponse('Pickup, destination, and fare are required'));
+  if (!pickupLocation || !destination || !vehicleType) {
+    return res.status(400).json(errorResponse('Pickup, destination, and vehicleType are required'));
   }
 
   try {
-    const newRide = await createRideRequest(req.user.id, pickupLocation, destination, parseFloat(fare));
+    const newRide = await createRideRequest(req.user.id, pickupLocation, destination, vehicleType);
 
     // Notify online drivers via Socket.io
     const io = req.app.get('io');
     if (io) {
-      io.to('drivers').emit('ride-requested', newRide);
+      io.to(`drivers_${newRide.vehicleType}`).emit('ride-requested', newRide);
     }
 
     return res.status(201).json(successResponse(newRide));
@@ -137,7 +138,15 @@ export const getAvailableRides = async (req: AuthenticatedRequest, res: Response
   }
 
   try {
-    const list = await fetchAvailableRidesList();
+    const driver = await prisma.driver.findUnique({
+      where: { userId: req.user.id }
+    });
+
+    if (!driver) {
+      return res.status(404).json(errorResponse('Driver profile not found'));
+    }
+
+    const list = await fetchAvailableRidesList(driver.vehicleType);
     return res.json(successResponse(list));
   } catch (err: any) {
     console.error('Get available rides error:', err);

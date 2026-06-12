@@ -2,7 +2,7 @@ import { prisma } from '@rydo/db';
 
 export const createScheduledRide = async (
   passengerId: string,
-  data: { pickupLocation: string; destination: string; fare: number; scheduledTime: string }
+  data: { pickupLocation: string; destination: string; vehicleType: string; scheduledTime: string }
 ) => {
   const time = new Date(data.scheduledTime);
   if (isNaN(time.getTime())) {
@@ -13,12 +13,18 @@ export const createScheduledRide = async (
     throw new Error('Scheduled time must be in the future');
   }
 
+  if (data.vehicleType !== 'E-Rickshaw' && data.vehicleType !== 'Golf Cart') {
+    throw new Error('Invalid vehicle type');
+  }
+  const fare = data.vehicleType === 'E-Rickshaw' ? 10 : 8;
+
   return prisma.scheduledRide.create({
     data: {
       passengerId,
       pickupLocation: data.pickupLocation,
       destination: data.destination,
-      fare: data.fare,
+      vehicleType: data.vehicleType,
+      fare,
       scheduledTime: time,
       status: 'PENDING'
     }
@@ -117,6 +123,7 @@ export const dispatchDueRides = async () => {
             pickupLocation: reservation.pickupLocation,
             destination: reservation.destination,
             status: 'REQUESTED',
+            vehicleType: reservation.vehicleType,
             fare: reservation.fare
           },
           include: {

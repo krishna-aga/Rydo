@@ -33,7 +33,7 @@ export const apiService = {
 
   // Ride endpoints
   getActiveRide: (token: string) => apiFetch<Ride>('/rides/active', token),
-  requestRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number }) => 
+  requestRide: (token: string, payload: { pickupLocation: string; destination: string; vehicleType: string; fare?: number }) => 
     apiFetch<Ride>('/rides/request', token, {
       method: 'POST',
       body: JSON.stringify(payload)
@@ -56,7 +56,7 @@ export const apiService = {
   getAvailableRides: (token: string) => apiFetch<Ride[]>('/rides/available', token),
 
   // Scheduling endpoints
-  scheduleRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number; scheduledTime: string }) => 
+  scheduleRide: (token: string, payload: { pickupLocation: string; destination: string; vehicleType: string; fare?: number; scheduledTime: string }) => 
     apiFetch<any>('/rides/schedule', token, {
       method: 'POST',
       body: JSON.stringify(payload)

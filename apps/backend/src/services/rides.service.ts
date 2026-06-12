@@ -1,6 +1,11 @@
 import { prisma } from '@rydo/db';
 
-export const createRideRequest = async (passengerId: string, pickupLocation: string, destination: string, fare: number) => {
+export const createRideRequest = async (
+  passengerId: string,
+  pickupLocation: string,
+  destination: string,
+  vehicleType: string
+) => {
   // Check if passenger already has an active ride
   const activeRide = await prisma.ride.findFirst({
     where: {
@@ -13,11 +18,18 @@ export const createRideRequest = async (passengerId: string, pickupLocation: str
     throw new Error('You already have an active ride request');
   }
 
+  // Enforce fixed fares: E-Rickshaw = ₹10, Golf Cart = ₹8
+  if (vehicleType !== 'E-Rickshaw' && vehicleType !== 'Golf Cart') {
+    throw new Error('Invalid vehicle type');
+  }
+  const fare = vehicleType === 'E-Rickshaw' ? 10 : 8;
+
   const newRide = await prisma.ride.create({
     data: {
       passengerId,
       pickupLocation,
       destination,
+      vehicleType,
       fare,
       status: 'REQUESTED'
     },
@@ -66,6 +78,10 @@ export const executeRideAccept = async (userId: string, rideId: string) => {
 
     if (ride.status !== 'REQUESTED' || ride.driverId) {
       throw new Error('Ride already accepted or cancelled');
+    }
+
+    if (driver.vehicleType !== ride.vehicleType) {
+      throw new Error('Vehicle type mismatch: Driver vehicle does not match ride request');
     }
 
     return tx.ride.update({
@@ -173,11 +189,12 @@ export const fetchActiveRideInfo = async (userId: string, userRole: string) => {
   }
 };
 
-export const fetchAvailableRidesList = async () => {
+export const fetchAvailableRidesList = async (driverVehicleType: string) => {
   return prisma.ride.findMany({
     where: {
       status: 'REQUESTED',
-      driverId: null
+      driverId: null,
+      vehicleType: driverVehicleType
     },
     include: {
       passenger: {
