@@ -105,5 +105,6 @@ pnpm dev
 
 ## 🌐 Live Deployments
 
-- **Backend Express Server**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
+- **Frontend Client App (Vercel)**: [https://rydo-web.vercel.app/](https://rydo-web.vercel.app/)
+- **Backend Express Server (Render)**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
 - **API Swagger Documentation**: [https://rydo-k1l4.onrender.com/api-docs](https://rydo-k1l4.onrender.com/api-docs)
