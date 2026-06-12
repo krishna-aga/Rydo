@@ -20,7 +20,7 @@ export default function SchedulingPanel() {
 
   const [pickup, setPickup] = useState('Main Gate');
   const [destination, setDestination] = useState('Govind Bhawan');
-  const [vehicleType, setVehicleType] = useState('E-Rickshaw');
+  const [vehicleType, setVehicleType] = useState('');
   const [dateTime, setDateTime] = useState('');
   const [booking, setBooking] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -54,6 +54,11 @@ export default function SchedulingPanel() {
 
     if (pickup === destination) {
       setErrMsg('Pickup and destination cannot be the same');
+      return;
+    }
+
+    if (!vehicleType) {
+      setErrMsg('Please select a vehicle type');
       return;
     }
 
@@ -96,6 +101,7 @@ export default function SchedulingPanel() {
       alert('Geolocation is not supported by your browser');
       return;
     }
+    setPickup('📍 Loading GPS...');
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
@@ -105,6 +111,7 @@ export default function SchedulingPanel() {
       (error) => {
         console.error('GPS tracking failed:', error);
         alert('Could not access your location. Please check browser permissions.');
+        setPickup('Main Gate');
       }
     );
   };
@@ -114,6 +121,30 @@ export default function SchedulingPanel() {
       setSelectingOnMap(null);
     } else {
       setSelectingOnMap(type);
+    }
+  };
+
+  const handlePickupChange = (val: string) => {
+    if (val === 'GPS') {
+      handleUseCurrentLocation();
+    } else if (val === 'MAP') {
+      triggerMapSelection('pickup');
+    } else {
+      setPickup(val);
+      if (selectingOnMap === 'pickup') {
+        setSelectingOnMap(null);
+      }
+    }
+  };
+
+  const handleDestinationChange = (val: string) => {
+    if (val === 'MAP') {
+      triggerMapSelection('destination');
+    } else {
+      setDestination(val);
+      if (selectingOnMap === 'destination') {
+        setSelectingOnMap(null);
+      }
     }
   };
 
@@ -138,80 +169,49 @@ export default function SchedulingPanel() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Pickup Landmark</label>
-            <div className="flex gap-2">
-              <select
-                value={pickup}
-                onChange={(e) => setPickup(e.target.value)}
-                className="flex-1 bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
-              >
-                <option value="Main Gate">Main Gate</option>
-                <option value="Govind Bhawan">Govind Bhawan</option>
-                <option value="Rajendra Bhawan">Rajendra Bhawan</option>
-                <option value="Ravindra Bhawan">Ravindra Bhawan</option>
-                <option value="Lecture Hall Complex">Lecture Hall Complex</option>
-                <option value="Library">Library</option>
+            <select
+              value={selectingOnMap === 'pickup' ? 'MAP' : pickup}
+              onChange={(e) => handlePickupChange(e.target.value)}
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
+            >
+              <option value="Main Gate">Main Gate</option>
+              <option value="Govind Bhawan">Govind Bhawan</option>
+              <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+              <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+              <option value="Lecture Hall Complex">Lecture Hall Complex</option>
+              <option value="Library">Library</option>
+              
+              <option disabled>──────────</option>
+              <option value="GPS">📍 Current Location (GPS)</option>
+              <option value="MAP">{selectingOnMap === 'pickup' ? '🗺️ Selecting on Map...' : '🗺️ Select location on Map'}</option>
 
-                {pickup && !['Main Gate', 'Govind Bhawan', 'Rajendra Bhawan', 'Ravindra Bhawan', 'Lecture Hall Complex', 'Library'].includes(pickup) && (
-                  <option value={pickup}>{pickup}</option>
-                )}
-              </select>
-
-              <button
-                type="button"
-                onClick={handleUseCurrentLocation}
-                title="Use Current GPS Location"
-                className="px-3.5 rounded-xl border border-slate-800 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-900 text-slate-300 text-xs font-semibold flex items-center justify-center transition-colors focus:outline-none"
-              >
-                📍 GPS
-              </button>
-              <button
-                type="button"
-                onClick={() => triggerMapSelection('pickup')}
-                title="Choose Coordinates on Map"
-                className={`px-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center transition-colors focus:outline-none ${
-                  selectingOnMap === 'pickup'
-                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
-                    : 'border-slate-800 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-900 text-slate-300'
-                }`}
-              >
-                🗺️ Map
-              </button>
-            </div>
+              {pickup && !['Main Gate', 'Govind Bhawan', 'Rajendra Bhawan', 'Ravindra Bhawan', 'Lecture Hall Complex', 'Library', 'GPS', 'MAP'].includes(pickup) && (
+                <option value={pickup}>{pickup}</option>
+              )}
+            </select>
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-400 uppercase mb-2">Destination Landmark</label>
-            <div className="flex gap-2">
-              <select
-                value={destination}
-                onChange={(e) => setDestination(e.target.value)}
-                className="flex-1 bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
-              >
-                <option value="Main Gate">Main Gate</option>
-                <option value="Govind Bhawan">Govind Bhawan</option>
-                <option value="Rajendra Bhawan">Rajendra Bhawan</option>
-                <option value="Ravindra Bhawan">Ravindra Bhawan</option>
-                <option value="Lecture Hall Complex">Lecture Hall Complex</option>
-                <option value="Library">Library</option>
+            <select
+              value={selectingOnMap === 'destination' ? 'MAP' : destination}
+              onChange={(e) => handleDestinationChange(e.target.value)}
+              className="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500 text-slate-300"
+            >
+              <option value="Main Gate">Main Gate</option>
+              <option value="Govind Bhawan">Govind Bhawan</option>
+              <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+              <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+              <option value="Lecture Hall Complex">Lecture Hall Complex</option>
+              <option value="Library">Library</option>
+              
+              <option disabled>──────────</option>
+              <option value="MAP">{selectingOnMap === 'destination' ? '🗺️ Selecting on Map...' : '🗺️ Select location on Map'}</option>
 
-                {destination && !['Main Gate', 'Govind Bhawan', 'Rajendra Bhawan', 'Ravindra Bhawan', 'Lecture Hall Complex', 'Library'].includes(destination) && (
-                  <option value={destination}>{destination}</option>
-                )}
-              </select>
-
-              <button
-                type="button"
-                onClick={() => triggerMapSelection('destination')}
-                title="Choose Coordinates on Map"
-                className={`px-3.5 rounded-xl border text-xs font-semibold flex items-center justify-center transition-colors focus:outline-none ${
-                  selectingOnMap === 'destination'
-                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-400'
-                    : 'border-slate-800 hover:border-slate-700 bg-slate-950/60 hover:bg-slate-900 text-slate-300'
-                }`}
-              >
-                🗺️ Map
-              </button>
-            </div>
+              {destination && !['Main Gate', 'Govind Bhawan', 'Rajendra Bhawan', 'Ravindra Bhawan', 'Lecture Hall Complex', 'Library', 'MAP'].includes(destination) && (
+                <option value={destination}>{destination}</option>
+              )}
+            </select>
           </div>
 
           <div>

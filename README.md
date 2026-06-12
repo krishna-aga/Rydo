@@ -1,8 +1,12 @@
 # Rydo - Real-Time Campus Mobility & Ride Management
 
-Rydo is a real-time campus mobility and ride management platform (designed for campus scenarios such as e-rickshaw dispatch systems at IIT Roorkee).
+---
 
-Built as a **Turborepo** monorepo using **pnpm workspaces** and native **ESModules (ESM)**.
+## 📝 Project Overview
+
+Rydo is a real-time campus mobility and ride management platform designed for campus transit dispatch scenarios, such as managing e-rickshaw fleets and golf cart operations at IIT Roorkee. 
+
+The system leverages a **Turborepo** monorepo using **pnpm workspaces** and native **ESModules (ESM)** to build modular, typesafe components for real-time driver tracking, ride dispatch workflows, ratings, notifications, and analytics.
 
 ---
 
@@ -17,7 +21,7 @@ Built as a **Turborepo** monorepo using **pnpm workspaces** and native **ESModul
 
 ---
 
-## ✨ Key Features
+## ✨ Feature List
 
 - **Real-Time Dispatch & Sockets**: Live driver location tracking on Leaflet maps and instant request/accept synchronization using Socket.io.
 - **Restricted Campus Vehicles & Flat Fares**: Restricted strictly to environment-friendly campus vehicles: **E-Rickshaw** (flat rate of ₹10) and **Golf Cart** (flat rate of ₹8).
@@ -53,7 +57,7 @@ Built as a **Turborepo** monorepo using **pnpm workspaces** and native **ESModul
 
 ---
 
-## 🚀 Setup & Execution Instructions
+## ⚙️ Setup Instructions
 
 ### Prerequisites
 Make sure you have [Node.js](https://nodejs.org/) and [pnpm](https://pnpm.io/) installed.
@@ -92,18 +96,26 @@ Build all packages and applications:
 pnpm build
 ```
 
-### 6. Start Development Servers
-Run the development environment concurrently:
+---
+
+## 🚀 Running the Application
+
+### Start Development Servers
+Run the development environment concurrently in watch mode:
 ```bash
 pnpm dev
 ```
-- Web Client: [http://localhost:3000](http://localhost:3000)
-- Express Server API: [http://localhost:5000](http://localhost:5000)
-- Watch compiles active changes in `@rydo/shared` and `@rydo/ui` on the fly.
+Once started:
+- **Web Client**: [http://localhost:3000](http://localhost:3000)
+- **Express Server API**: [http://localhost:5000](http://localhost:5000)
+- **Interactive Swagger Docs**: [http://localhost:5000/api-docs](http://localhost:5000/api-docs)
+
+*Note: Monorepo watch compilers will compile any active changes inside `@rydo/shared` and `@rydo/ui` automatically.*
 
 ---
 
 ## 🌐 Live Deployments
 
-- **Backend Express Server**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
+- **Frontend Client App (Vercel)**: [https://rydo-web.vercel.app/](https://rydo-web.vercel.app/)
+- **Backend Express Server (Render)**: [https://rydo-k1l4.onrender.com](https://rydo-k1l4.onrender.com)
 - **API Swagger Documentation**: [https://rydo-k1l4.onrender.com/api-docs](https://rydo-k1l4.onrender.com/api-docs)

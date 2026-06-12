@@ -146,21 +146,6 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
           markersRef.current.push(marker);
         }
       });
-    } else {
-      // Spawn mock e-rickshaw drivers if no onlineDrivers are loaded AND no coordinates are present
-      if (points.length === 0) {
-        const mockDrivers: [number, number][] = [
-          [29.8635, 77.8935],
-          [29.8655, 77.8970],
-          [29.8625, 77.8955]
-        ];
-        mockDrivers.forEach((coord, idx) => {
-          const marker = L.marker(coord, {
-            icon: createCustomIcon('bg-emerald-400 border border-emerald-500 shadow-lg', `E-Rickshaw #${idx + 104}`)
-          }).addTo(map);
-          markersRef.current.push(marker);
-        });
-      }
     }
 
     // Draw route if both pickup and destination are present
