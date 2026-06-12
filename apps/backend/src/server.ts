@@ -11,7 +11,7 @@ dotenv.config({ path: '../../.env' });
 const port = process.env.PORT || 5000;
 
 // Set up CORS allowed origins dynamic lookup
-const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000"];
+const allowedOrigins = ["http://localhost:3000", "http://127.0.0.1:3000","https://rydo-k1l4.onrender.com"];
 if (env.CLIENT_URL) {
   const additional = env.CLIENT_URL.split(',').map(url => url.trim());
   additional.forEach(origin => {
