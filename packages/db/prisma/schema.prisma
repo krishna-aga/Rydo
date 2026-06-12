@@ -10,6 +10,7 @@ generator client {
 enum Role {
   PASSENGER
   DRIVER
+  ADMIN
 }
 
 enum RideStatus {
@@ -48,7 +49,7 @@ model Driver {
   vehicleNumber      String
   isOnline           Boolean            @default(false)
   verificationStatus VerificationStatus @default(PENDING)
-  rating             Float              @default(5.0)
+  rating             Float              @default(0.0)
   latitude           Float?
   longitude          Float?
 

@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import { useRideStore } from '../store/useRideStore.js';
+import { LANDMARK_COORDINATES } from '../utils/coordinates.js';
 
 interface MapCanvasProps {
   pickupLocation?: string;
@@ -8,14 +10,31 @@ interface MapCanvasProps {
   assignedDriverId?: string;
 }
 
-import { LANDMARK_COORDINATES } from '../utils/coordinates.js';
-
+// Utility to parse coordinate strings or resolve landmarks
+const getCoordinatesForLocation = (locationName: string): [number, number] | null => {
+  if (!locationName) return null;
+  if (LANDMARK_COORDINATES[locationName]) {
+    return LANDMARK_COORDINATES[locationName];
+  }
+  // Extract custom lat/lng coordinates format like "Custom Location (29.864, 77.892)"
+  const match = locationName.match(/.*\(([^,]+),\s*([^)]+)\)/);
+  if (match) {
+    const lat = parseFloat(match[1]);
+    const lng = parseFloat(match[2]);
+    if (!isNaN(lat) && !isNaN(lng)) {
+      return [lat, lng];
+    }
+  }
+  return null;
+};
 
 export default function MapCanvas({ pickupLocation, destination, onlineDrivers, assignedDriverId }: MapCanvasProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
   const markersRef = useRef<L.Marker[]>([]);
   const routingPolylineRef = useRef<L.Polyline | null>(null);
+
+  const { selectingOnMap } = useRideStore();
 
   useEffect(() => {
     if (!mapContainerRef.current) return;
@@ -33,6 +52,20 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
     }).addTo(map);
 
     L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+    // Map click listener for setting custom pickup or destination coordinates
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      const { lat, lng } = e.latlng;
+      const rideStore = useRideStore.getState();
+      
+      if (rideStore.selectingOnMap === 'pickup') {
+        rideStore.setTempPickup(`Custom Location (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+        rideStore.setSelectingOnMap(null);
+      } else if (rideStore.selectingOnMap === 'destination') {
+        rideStore.setTempDestination(`Custom Location (${lat.toFixed(5)}, ${lng.toFixed(5)})`);
+        rideStore.setSelectingOnMap(null);
+      }
+    });
 
     mapRef.current = map;
 
@@ -70,19 +103,19 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
       });
     };
 
-    if (pickupLocation && LANDMARK_COORDINATES[pickupLocation]) {
-      const coord = LANDMARK_COORDINATES[pickupLocation];
-      points.push(coord);
-      const marker = L.marker(coord, {
+    const pCoord = getCoordinatesForLocation(pickupLocation || '');
+    if (pCoord) {
+      points.push(pCoord);
+      const marker = L.marker(pCoord, {
         icon: createCustomIcon('bg-indigo-500', 'Pickup')
       }).addTo(map);
       markersRef.current.push(marker);
     }
 
-    if (destination && LANDMARK_COORDINATES[destination]) {
-      const coord = LANDMARK_COORDINATES[destination];
-      points.push(coord);
-      const marker = L.marker(coord, {
+    const dCoord = getCoordinatesForLocation(destination || '');
+    if (dCoord) {
+      points.push(dCoord);
+      const marker = L.marker(dCoord, {
         icon: createCustomIcon('bg-rose-500', 'Destination')
       }).addTo(map);
       markersRef.current.push(marker);
@@ -131,10 +164,7 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
     }
 
     // Draw route if both pickup and destination are present
-    if (pickupLocation && LANDMARK_COORDINATES[pickupLocation] && destination && LANDMARK_COORDINATES[destination]) {
-      const pCoord = LANDMARK_COORDINATES[pickupLocation];
-      const dCoord = LANDMARK_COORDINATES[destination];
-
+    if (pCoord && dCoord) {
       // Draw initial fallback straight dashed line
       const fallbackPolyline = L.polyline([pCoord, dCoord], {
         color: '#6366f1',
@@ -193,6 +223,15 @@ export default function MapCanvas({ pickupLocation, destination, onlineDrivers, 
         <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         <span className="text-xs font-semibold text-slate-300">IIT Roorkee Operations Grid</span>
       </div>
+
+      {selectingOnMap && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-[400] bg-indigo-600/90 text-white backdrop-blur-md border border-indigo-400/30 px-5 py-2 rounded-full shadow-2xl flex items-center gap-2 animate-bounce">
+          <span className="text-sm">📍</span>
+          <span className="text-xs font-bold uppercase tracking-wider">
+            Click on the map to set {selectingOnMap === 'pickup' ? 'Pickup' : 'Destination'}
+          </span>
+        </div>
+      )}
     </div>
   );
 }

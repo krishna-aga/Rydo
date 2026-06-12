@@ -9,6 +9,10 @@ export const updateDriverStatus = async (userId: string, isOnline: boolean) => {
     throw new Error('Driver profile not found');
   }
 
+  if (driver.verificationStatus !== 'APPROVED') {
+    throw new Error('Driver profile is not approved by administrator');
+  }
+
   const updatedDriver = await prisma.driver.update({
     where: { id: driver.id },
     data: { isOnline },
@@ -25,6 +29,10 @@ export const updateDriverLocation = async (userId: string, latitude: number, lon
 
   if (!driver) {
     throw new Error('Driver profile not found');
+  }
+
+  if (driver.verificationStatus !== 'APPROVED') {
+    throw new Error('Driver profile is not approved by administrator');
   }
 
   const updatedDriver = await prisma.driver.update({

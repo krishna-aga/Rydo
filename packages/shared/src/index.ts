@@ -1,4 +1,4 @@
-export type Role = 'PASSENGER' | 'DRIVER';
+export type Role = 'PASSENGER' | 'DRIVER' | 'ADMIN';
 export type RideStatus = 'REQUESTED' | 'ACCEPTED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
 export type VerificationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 

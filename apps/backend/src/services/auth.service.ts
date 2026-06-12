@@ -24,7 +24,7 @@ export const registerUser = async (data: any) => {
         create: {
           vehicleType: vehicleType!,
           vehicleNumber: vehicleNumber!,
-          verificationStatus: 'APPROVED'
+          verificationStatus: 'PENDING'
         }
       } : undefined
     },

@@ -21,7 +21,7 @@ erDiagram
         String email UK
         String name
         String password
-        Role role "PASSENGER | DRIVER"
+        Role role "PASSENGER | DRIVER | ADMIN"
         DateTime createdAt
     }
 
@@ -82,7 +82,7 @@ Represents any account registered on the platform. Can be either a Passenger or 
 | `email` | `String` | `@unique` | Login email identifier |
 | `name` | `String?` | Optional | User's full name |
 | `password` | `String` | - | Hashed password string |
-| `role` | `Role` | `Enum (PASSENGER, DRIVER)` | Designates user profile privileges |
+| `role` | `Role` | `Enum (PASSENGER, DRIVER, ADMIN)` | Designates user profile privileges |
 | `createdAt` | `DateTime` | `@default(now())` | Creation timestamp |
 
 ### 2. Driver Model
@@ -96,7 +96,7 @@ Extends the `User` model with driver-specific properties.
 | `vehicleNumber` | `String` | - | License plate number |
 | `isOnline` | `Boolean` | `@default(false)` | Flag showing if driver is accepting requests |
 | `verificationStatus` | `String` | - | Verification workflow state |
-| `rating` | `Float` | `@default(5.0)` | Running average rating |
+| `rating` | `Float` | `@default(0.0)` | Running average rating |
 | `latitude` | `Float?` | Optional | Current latitude coordinate for live tracking |
 | `longitude` | `Float?` | Optional | Current longitude coordinate for live tracking |
 

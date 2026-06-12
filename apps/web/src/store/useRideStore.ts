@@ -9,6 +9,12 @@ interface RideState {
   scheduledRides: any[];
   loading: boolean;
   error: string | null;
+  selectingOnMap: 'pickup' | 'destination' | null;
+  tempPickup: string | null;
+  tempDestination: string | null;
+  setSelectingOnMap: (value: 'pickup' | 'destination' | null) => void;
+  setTempPickup: (value: string | null) => void;
+  setTempDestination: (value: string | null) => void;
   fetchActiveRide: (token: string) => Promise<void>;
   requestRide: (token: string, payload: { pickupLocation: string; destination: string; fare: number }) => Promise<boolean>;
   acceptRide: (token: string, rideId: string) => Promise<boolean>;
@@ -29,6 +35,12 @@ export const useRideStore = create<RideState>((set) => ({
   scheduledRides: [],
   loading: false,
   error: null,
+  selectingOnMap: null,
+  tempPickup: null,
+  tempDestination: null,
+  setSelectingOnMap: (value) => set({ selectingOnMap: value }),
+  setTempPickup: (value) => set({ tempPickup: value }),
+  setTempDestination: (value) => set({ tempDestination: value }),
 
   fetchActiveRide: async (token) => {
     set({ loading: true, error: null });

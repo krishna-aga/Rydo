@@ -19,28 +19,34 @@ export default function Navbar() {
       </div>
 
       {/* Tab Selectors */}
-      <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/80 shadow-inner">
-        <button
-          onClick={() => setActiveTab('operations')}
-          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
-            activeTab === 'operations'
-              ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 border-transparent'
-          }`}
-        >
-          Operations
-        </button>
-        <button
-          onClick={() => setActiveTab('analytics')}
-          className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
-            activeTab === 'analytics'
-              ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
-              : 'text-slate-400 hover:text-slate-200 border-transparent'
-          }`}
-        >
-          Analytics
-        </button>
-      </div>
+      {user.role === 'ADMIN' ? (
+        <div className="text-xs font-extrabold uppercase tracking-widest text-indigo-400 bg-indigo-950/20 border border-indigo-900/30 px-4 py-2 rounded-xl">
+          🛡️ Admin Console
+        </div>
+      ) : (
+        <div className="flex items-center gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800/80 shadow-inner">
+          <button
+            onClick={() => setActiveTab('operations')}
+            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
+              activeTab === 'operations'
+                ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 border-transparent'
+            }`}
+          >
+            Operations
+          </button>
+          <button
+            onClick={() => setActiveTab('analytics')}
+            className={`px-4 py-1.5 text-xs font-bold uppercase tracking-wider rounded-lg transition-all border ${
+              activeTab === 'analytics'
+                ? 'bg-indigo-500/15 text-indigo-400 border-indigo-500/25 shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 border-transparent'
+            }`}
+          >
+            Analytics
+          </button>
+        </div>
+      )}
 
       <div className="flex items-center gap-4">
         <div className="text-right hidden sm:block">

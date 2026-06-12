@@ -6,6 +6,26 @@ All endpoints are served from `/api` (e.g., `http://localhost:5000/api/users`).
 
 ---
 
+## 📖 Interactive Swagger API Documentation
+Interactive Swagger UI documentation is hosted at:
+- **URL**: `/api-docs` (e.g., `http://localhost:5000/api-docs`)
+
+This dashboard provides a visual interface detailing each path's expected parameters, payload formats, and status codes, and allows sandbox execution of requests directly in-browser.
+
+## 🛡️ Production & Security Safeguards
+1. **Global Rate Limiting**: All client IPs are globally rate-limited to 100 requests per 15 minutes.
+2. **Brute Force Prevention**: Authentication endpoints (`/api/auth/login` and `/api/auth/signup`) are strictly limited to 20 requests per 15 minutes.
+3. **Request Schema Validation**: Incoming payloads for signup, login, ride booking, scheduling, and ratings are strictly validated using Zod. If the request body doesn't meet the schemas, a `400 Bad Request` is returned:
+   ```json
+   {
+     "success": false,
+     "error": "Validation failed: field_name: error_description"
+   }
+   ```
+4. **Standardized Error Handling**: Uncaught runtime backend exceptions are intercepted by a global handler, logged with server timestamps and stack traces, and returned using standard API envelopes.
+
+---
+
 ## 🔒 Authentication Routes (`/api/auth`)
 
 ### 1. Register User
@@ -527,6 +547,59 @@ Retrieves system-wide transits counts, hourly peak demand patterns, and landmark
       "popularPickupPoints": [
         { "location": "Main Gate", "count": 94 }
       ]
+    }
+  }
+  ```
+
+---
+
+## 🛡️ Admin Console Routes (`/api/admin`)
+
+These endpoints are strictly restricted to authenticated users logged in under the `ADMIN` role.
+
+### 1. Fetch Verification Queue
+Lists all drivers currently marked as `PENDING` or `REJECTED` awaiting credential reviews.
+- **URL**: `/api/admin/drivers/pending`
+- **Method**: `GET`
+- **Headers**: `Authorization: Bearer <token>`
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "id": "driver-uuid",
+        "userId": "user-uuid",
+        "name": "Jane Driver",
+        "email": "driver@example.com",
+        "vehicleType": "E-Rickshaw",
+        "vehicleNumber": "UK-08-ER-1234",
+        "verificationStatus": "PENDING",
+        "createdAt": "2026-06-12T02:00:00.000Z"
+      }
+    ]
+  }
+  ```
+
+### 2. Verify Driver Status
+Approves or rejects a pending driver registration.
+- **URL**: `/api/admin/drivers/:id/verify`
+- **Method**: `PATCH`
+- **Headers**: `Authorization: Bearer <token>`
+- **Request Body**:
+  ```json
+  {
+    "status": "APPROVED" // or "REJECTED"
+  }
+  ```
+- **Response (`200 OK`)**:
+  ```json
+  {
+    "success": true,
+    "data": {
+      "id": "driver-uuid",
+      "name": "Jane Driver",
+      "verificationStatus": "APPROVED"
     }
   }
   ```
