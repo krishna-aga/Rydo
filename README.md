@@ -17,6 +17,18 @@ Built as a **Turborepo** monorepo using **pnpm workspaces** and native **ESModul
 
 ---
 
+## ✨ Key Features
+
+- **Real-Time Dispatch & Sockets**: Live driver location tracking on Leaflet maps and instant request/accept synchronization using Socket.io.
+- **Restricted Campus Vehicles & Flat Fares**: Restricted strictly to environment-friendly campus vehicles: **E-Rickshaw** (flat rate of ₹10) and **Golf Cart** (flat rate of ₹8).
+- **Advanced Ride Scheduling**: Book future campus transits using date-time selectors, dispatched dynamically via server background minute cron tasks.
+- **Interactive Map Selection**: Choose coordinates/landmarks directly by clicking on the campus Leaflet Map canvas or trigger GPS geolocation.
+- **Navbar Notification Center**: Access a persistent dropdown panel of unread and history notifications inside the header, with options to mark read and clear all.
+- **Analytics & Admin Console**: Integrated Recharts statistics dashboards for drivers/passengers and an interactive driver credentials approval verification queue for admins.
+- **Swagger Documentation**: Production-ready API endpoints interactive sandbox fully documented at `/api-docs`.
+
+---
+
 ## 📁 Repository Structure
 
 ```text

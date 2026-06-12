@@ -22,7 +22,7 @@
 | **Phase 11** | Analytics Dashboard | **Completed** | Visualizing rides, peak hours, and hotspots using Recharts. |
 | **Phase 12** | Scheduled Rides | **Completed** | Advanced transit booking system dispatched by background minute crons. |
 | **Phase 13** | AI Features | *Pending* | Distance/rating matching, demand analytics/forecasting, chatbot. |
-| **Phase 14** | Production Improvements | **Completed** | Zod schema validation, Swagger UI docs (/api-docs), custom level console logger, Morgan requests interceptor, global & auth rate limits, default driver rating to 0.0, real-time custom toast + native browser notification system, and interactive map-clicking coordinate selection + GPS geolocation pickup/destination selectors. |
+| **Phase 14** | Production Improvements | **Completed** | Zod schema validation, Swagger UI docs (/api-docs), custom level console logger, Morgan requests interceptor, global & auth rate limits, default driver rating to 0.0, real-time custom toast + native browser notification system, interactive map-clicking coordinate selection + GPS geolocation pickup/destination selectors, persistent Notification Center bell dropdown in the Navbar, and restriction of vehicles to E-Rickshaws (₹10 flat fare) and Golf Carts (₹8 flat fare). |
 | **Phases 15-18** | Redis, Docker, Deploy, Docs | *Pending* | Future feature sets. |
 
 ---

@@ -199,7 +199,7 @@ Creates a new ride request in the system (triggered by Passengers).
   {
     "pickupLocation": "Main Gate, IIT Roorkee",
     "destination": "Govind Bhawan, IIT Roorkee",
-    "fare": 50.0
+    "vehicleType": "E-Rickshaw" // or "Golf Cart"
   }
   ```
 - **Response (`201 Created`)**:
@@ -211,8 +211,9 @@ Creates a new ride request in the system (triggered by Passengers).
       "passengerId": "passenger-uuid",
       "pickupLocation": "Main Gate, IIT Roorkee",
       "destination": "Govind Bhawan, IIT Roorkee",
+      "vehicleType": "E-Rickshaw",
       "status": "REQUESTED",
-      "fare": 50.0,
+      "fare": 10.0,
       "createdAt": "2026-06-10T12:05:00.000Z"
     }
   }
@@ -278,8 +279,9 @@ Retrieves the current ongoing ride booking associated with the authenticated pas
       "driverId": "driver-uuid",
       "pickupLocation": "Main Gate",
       "destination": "Govind Bhawan",
+      "vehicleType": "E-Rickshaw",
       "status": "ACCEPTED",
-      "fare": 50
+      "fare": 10.0
     }
   }
   ```
@@ -299,8 +301,9 @@ Retrieves a list of pending/requested ride bookings awaiting assignment.
         "passengerId": "passenger-uuid",
         "pickupLocation": "Main Gate",
         "destination": "Govind Bhawan",
+        "vehicleType": "E-Rickshaw",
         "status": "REQUESTED",
-        "fare": 50
+        "fare": 10.0
       }
     ]
   }
@@ -455,7 +458,7 @@ Reserves a ride for a future time.
   {
     "pickupLocation": "Main Gate",
     "destination": "Library",
-    "fare": 45.0,
+    "vehicleType": "E-Rickshaw", // or "Golf Cart"
     "scheduledTime": "2026-06-12T14:30:00.000Z"
   }
   ```
@@ -468,7 +471,8 @@ Reserves a ride for a future time.
       "passengerId": "passenger-uuid",
       "pickupLocation": "Main Gate",
       "destination": "Library",
-      "fare": 45,
+      "vehicleType": "E-Rickshaw",
+      "fare": 10.0,
       "scheduledTime": "2026-06-12T14:30:00.000Z",
       "status": "PENDING",
       "createdAt": "2026-06-12T03:00:00.000Z"
@@ -491,7 +495,8 @@ Lists pending future rides scheduled by the passenger.
         "passengerId": "passenger-uuid",
         "pickupLocation": "Main Gate",
         "destination": "Library",
-        "fare": 45,
+        "vehicleType": "E-Rickshaw",
+        "fare": 10.0,
         "scheduledTime": "2026-06-12T14:30:00.000Z",
         "status": "PENDING",
         "createdAt": "2026-06-12T03:00:00.000Z"
