@@ -47,7 +47,13 @@ export const registerUser = async (data: any) => {
       name: newUser.name || undefined,
       role: newUser.role,
       createdAt: newUser.createdAt.toISOString()
-    }
+    },
+    driverProfile: newUser.driverProfile ? {
+      id: newUser.driverProfile.id,
+      vehicleType: newUser.driverProfile.vehicleType,
+      vehicleNumber: newUser.driverProfile.vehicleNumber,
+      verificationStatus: newUser.driverProfile.verificationStatus
+    } : undefined
   };
 };
 

@@ -130,7 +130,6 @@ export default function Login() {
                       className="w-full bg-slate-950/60 border border-slate-800 focus:border-indigo-500 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500 transition-colors"
                     >
                       <option value="E-Rickshaw">E-Rickshaw</option>
-                      <option value="Cab">Cab</option>
                       <option value="Golf Cart">Golf Cart</option>
                     </select>
                   </div>

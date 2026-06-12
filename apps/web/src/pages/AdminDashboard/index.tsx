@@ -30,6 +30,20 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     fetchDriversList();
+
+    const handleDriverRegistered = (e: Event) => {
+      const customEvent = e as CustomEvent;
+      const newDriver = customEvent.detail;
+      setDrivers((prev) => {
+        if (prev.some(d => d.id === newDriver.id)) return prev;
+        return [newDriver, ...prev];
+      });
+    };
+
+    window.addEventListener('driver-registered-event', handleDriverRegistered);
+    return () => {
+      window.removeEventListener('driver-registered-event', handleDriverRegistered);
+    };
   }, [token]);
 
   const handleVerify = async (driverId: string, status: 'APPROVED' | 'REJECTED') => {

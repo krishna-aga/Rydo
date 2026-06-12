@@ -25,18 +25,17 @@ export default function Home() {
 
   const { connectSocket, disconnectSocket } = useSocketStore();
 
-  // Connect socket on validation (skip for admin accounts)
+  // Connect socket on validation (now including admin accounts for real-time notifications)
   useEffect(() => {
     if (token && user) {
-      if (user.role === 'ADMIN') return;
-
       connectSocket(user.id, user.role);
       
-      // Pull initial state
-      fetchActiveRide(token);
+      // Pull initial state (only for passenger or driver roles)
       if (user.role === 'PASSENGER') {
+        fetchActiveRide(token);
         fetchOnlineDrivers(token);
       } else if (user.role === 'DRIVER') {
+        fetchActiveRide(token);
         fetchAvailableRides(token);
       }
     }

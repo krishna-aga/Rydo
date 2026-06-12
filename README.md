@@ -1,7 +1,9 @@
 # Rydo - Real-Time Campus Mobility & Ride Management
 
 ---
+Project Deck:-https://docs.google.com/presentation/d/1D6U2__dRytR3ZGDtZw-yZmLThc1gtjMDgvWZWdhtMJs/edit?usp=sharing
 
+Demo video : https://drive.google.com/file/d/1rwRnaqsbUfvkUrsvqshuQ85ZxAo4OZHs/view?usp=sharing
 ## 📝 Project Overview
 
 Rydo is a real-time campus mobility and ride management platform designed for campus transit dispatch scenarios, such as managing e-rickshaw fleets and golf cart operations at IIT Roorkee. 

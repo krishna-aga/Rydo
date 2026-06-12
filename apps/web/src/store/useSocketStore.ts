@@ -26,7 +26,7 @@ interface SocketState {
   notifications: NotificationItem[];
   addToast: (message: string, type?: Toast['type']) => void;
   removeToast: (id: string) => void;
-  connectSocket: (userId: string, role: 'PASSENGER' | 'DRIVER') => void;
+  connectSocket: (userId: string, role: 'PASSENGER' | 'DRIVER' | 'ADMIN') => void;
   disconnectSocket: () => void;
   closeRatingModal: () => void;
   markAllAsRead: () => void;
@@ -103,6 +103,42 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       console.log('🔌 Disconnected from Socket.io server');
     });
 
+    // 0. Admin-Specific Notification Listeners
+    if (role === 'ADMIN') {
+      socket.on('driver-registered', (newDriver) => {
+        console.log('📋 New driver registered:', newDriver);
+        const msg = `📋 New driver registration request: ${newDriver.name} (${newDriver.vehicleType})`;
+        get().addToast(msg, 'info');
+        triggerBrowserNotification(
+          'New Driver Registration! 📋',
+          `${newDriver.name} has registered as a driver with vehicle ${newDriver.vehicleType} (${newDriver.vehicleNumber}) and is awaiting verification.`
+        );
+        window.dispatchEvent(new CustomEvent('driver-registered-event', { detail: newDriver }));
+      });
+    }
+
+    // 0.1 Driver Verification Update Listener
+    if (role === 'DRIVER') {
+      socket.on('driver-verification-updated', ({ verificationStatus }) => {
+        console.log('🚗 Driver verification updated:', verificationStatus);
+        const authState = useAuthStore.getState();
+        if (authState.driver) {
+          useAuthStore.setState({
+            driver: {
+              ...authState.driver,
+              verificationStatus
+            }
+          });
+        }
+        const msg = `🛡️ Your verification status has been updated to: ${verificationStatus}`;
+        get().addToast(msg, verificationStatus === 'APPROVED' ? 'success' : 'warning');
+        triggerBrowserNotification(
+          'Verification Update! 🛡️',
+          `Your driver account has been ${verificationStatus.toLowerCase()}.`
+        );
+      });
+    }
+
     // Real-Time Events Configuration
     
     // 1. Driver Availability Broadcasts (for Passengers)
@@ -160,56 +196,59 @@ export const useSocketStore = create<SocketState>((set, get) => ({
         });
       }
     });
-
     // 2. Booking Requests Dispatch (for Drivers)
-    socket.on('ride-requested', (newRide) => {
-      console.log('🗺️ Incoming booking request:', newRide);
-      useRideStore.setState((state) => ({
-        availableRides: [newRide, ...state.availableRides]
-      }));
+    if (role === 'DRIVER') {
+      socket.on('ride-requested', (newRide) => {
+        console.log('🗺️ Incoming booking request:', newRide);
+        useRideStore.setState((state) => ({
+          availableRides: [newRide, ...state.availableRides]
+        }));
 
-      const msg = `🗺️ New booking request: ${newRide.pickupLocation} ➔ ${newRide.destination} (Fare: ₹${newRide.fare})`;
-      get().addToast(msg, 'info');
-      triggerBrowserNotification('New Ride Request! 🗺️', `From ${newRide.pickupLocation} to ${newRide.destination} for ₹${newRide.fare}.`);
-    });
+        const msg = `🗺️ New booking request: ${newRide.pickupLocation} ➔ ${newRide.destination} (Fare: ₹${newRide.fare})`;
+        get().addToast(msg, 'info');
+        triggerBrowserNotification('New Ride Request! 🗺️', `From ${newRide.pickupLocation} to ${newRide.destination} for ₹${newRide.fare}.`);
+      });
 
-    socket.on('ride-removed', ({ rideId }) => {
-      console.log('🗺️ Booking request accepted elsewhere/cancelled:', rideId);
-      useRideStore.setState((state) => ({
-        availableRides: state.availableRides.filter(r => r.id !== rideId)
-      }));
-    });
+      socket.on('ride-removed', ({ rideId }) => {
+        console.log('🗺️ Booking request accepted elsewhere/cancelled:', rideId);
+        useRideStore.setState((state) => ({
+          availableRides: state.availableRides.filter(r => r.id !== rideId)
+        }));
+      });
+    }
 
     // 3. Passenger Live Updates (for Passenger)
-    socket.on('ride-accepted', (updatedRide) => {
-      console.log('🗺️ Ride booking accepted:', updatedRide);
-      useRideStore.setState({ activeRide: updatedRide });
+    if (role === 'PASSENGER') {
+      socket.on('ride-accepted', (updatedRide) => {
+        console.log('🗺️ Ride booking accepted:', updatedRide);
+        useRideStore.setState({ activeRide: updatedRide });
 
-      const driverName = updatedRide.driver?.user?.name || 'A campus driver';
-      const msg = `🎉 Your ride request has been accepted by driver: ${driverName}!`;
-      get().addToast(msg, 'success');
-      triggerBrowserNotification('Ride Accepted! 🎉', `Driver ${driverName} is on the way to pick you up.`);
-    });
+        const driverName = updatedRide.driver?.user?.name || 'A campus driver';
+        const msg = `🎉 Your ride request has been accepted by driver: ${driverName}!`;
+        get().addToast(msg, 'success');
+        triggerBrowserNotification('Ride Accepted! 🎉', `Driver ${driverName} is on the way to pick you up.`);
+      });
 
-    socket.on('ride-started', (updatedRide) => {
-      console.log('🗺️ Ride started:', updatedRide);
-      useRideStore.setState({ activeRide: updatedRide });
+      socket.on('ride-started', (updatedRide) => {
+        console.log('🗺️ Ride started:', updatedRide);
+        useRideStore.setState({ activeRide: updatedRide });
 
-      const msg = `🚗 Your ride has started! Heading to ${updatedRide.destination}.`;
-      get().addToast(msg, 'info');
-      triggerBrowserNotification('Ride Started! 🚗', `En route to ${updatedRide.destination}.`);
-    });
+        const msg = `🚗 Your ride has started! Heading to ${updatedRide.destination}.`;
+        get().addToast(msg, 'info');
+        triggerBrowserNotification('Ride Started! 🚗', `En route to ${updatedRide.destination}.`);
+      });
 
-    socket.on('ride-completed', (updatedRide) => {
-      console.log('🗺️ Ride completed:', updatedRide);
-      // Trigger the rating feedback modal overlay
-      set({ showRatingModal: true, ratingRideId: updatedRide.id });
-      useRideStore.setState({ activeRide: null });
+      socket.on('ride-completed', (updatedRide) => {
+        console.log('🗺️ Ride completed:', updatedRide);
+        // Trigger the rating feedback modal overlay
+        set({ showRatingModal: true, ratingRideId: updatedRide.id });
+        useRideStore.setState({ activeRide: null });
 
-      const msg = `🏁 You have reached your destination: ${updatedRide.destination}. Please leave a rating!`;
-      get().addToast(msg, 'success');
-      triggerBrowserNotification('Ride Completed! 🏁', `Thank you for riding with Rydo.`);
-    });
+        const msg = `🏁 You have reached your destination: ${updatedRide.destination}. Please leave a rating!`;
+        get().addToast(msg, 'success');
+        triggerBrowserNotification('Ride Completed! 🏁', `Thank you for riding with Rydo.`);
+      });
+    }
 
     // 4. Live Cancellations (for Passenger and Driver)
     socket.on('ride-cancelled', ({ rideId }) => {

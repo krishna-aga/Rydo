@@ -20,6 +20,24 @@ export const signup = async (req: Request, res: Response) => {
 
   try {
     const data = await registerUser(req.body);
+    
+    // Notify admins in real-time if a driver registers
+    if (role === 'DRIVER' && data.driverProfile) {
+      const io = req.app.get('io');
+      if (io) {
+        io.to('admins').emit('driver-registered', {
+          id: data.driverProfile.id,
+          userId: data.user.id,
+          name: data.user.name || 'Anonymous',
+          email: data.user.email,
+          vehicleType: data.driverProfile.vehicleType,
+          vehicleNumber: data.driverProfile.vehicleNumber,
+          verificationStatus: data.driverProfile.verificationStatus,
+          createdAt: data.user.createdAt
+        });
+      }
+    }
+
     return res.status(201).json(successResponse(data));
   } catch (err: any) {
     if (err.message === 'Email is already registered') {
